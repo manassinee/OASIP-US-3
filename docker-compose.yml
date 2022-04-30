@@ -1,0 +1,29 @@
+version: "3"
+
+services:
+  db:
+    image: mysql/mysql-server
+    volumes:
+      - "./db/script:/docker-entrypoint-initdb.d/"
+      - "./db/data:/var/lib/mysql"
+
+  backend:
+    build:
+      context: "./backend"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    env_file:
+      - "./backend/.env.prod"
+    restart: on-failure
+
+  nginx:
+    build:
+      context: "./frontend"
+      args:
+        - VITE_API_URL=http://intproj21.sit.kmutt.ac.th:8080/us3/api
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
