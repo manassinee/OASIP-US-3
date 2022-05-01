@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -15,5 +16,11 @@ public class EventService {
     public List<Event> getAll() {
         List<Event> events = repository.findAll();
         return events;
+    }
+
+    public Event getEvent(Integer id){
+        Optional<Event> event = repository.findById(id);
+
+        return event.orElse(null);
     }
 }
