@@ -10,7 +10,7 @@ RUN --mount=type=cache,target=/root/.m2 \
 COPY src src
 
 RUN --mount=type=cache,target=/root/.m2 \
-  ["mvn", "-f", "pom.xml", "-o", "package"]
+  ["mvn", "-f", "pom.xml", "clean", "package", "-DskipTests"]
 
 
 
