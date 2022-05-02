@@ -22,8 +22,13 @@ services:
     depends_on:
       - db
     env_file:
-      - "./backend/.env.prod"
+      - "./backend/.env"
     restart: on-failure
+    environment:
+      - MYSQL_USER=us3admin
+      - MYSQL_HOST=db
+      - MYSQL_PORT=3306
+      - MYSQL_DATABASE=oasip
 
   nginx:
     build:
