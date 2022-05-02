@@ -6,6 +6,8 @@ services:
     volumes:
       - "./db/script:/docker-entrypoint-initdb.d/"
       - "./db/data:/var/lib/mysql"
+    environment:
+      - TZ=Asia/Bangkok
 
   backend:
     build:
@@ -22,7 +24,7 @@ services:
     build:
       context: "./frontend"
       args:
-        - VITE_API_URL=http://intproj21.sit.kmutt.ac.th:8080/us3/api
+        - VITE_API_URL=http://ip21us3.sit.kmutt.ac.th:8080/api
     ports:
       - "80:80"
     depends_on:

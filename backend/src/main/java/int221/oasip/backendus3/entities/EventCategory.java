@@ -6,7 +6,7 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "eventcategory")
+@Table(name = "eventCategory")
 @Setter
 @Getter
 public class EventCategory {
