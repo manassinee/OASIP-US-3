@@ -4,6 +4,7 @@ import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.services.EventService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,4 +18,12 @@ public class EventController {
 
     @GetMapping("")
     public List<Event> getEvents(){ return service.getAll(); }
+
+    @GetMapping("/{id}")
+    public Event getEventById(@PathVariable Integer id){
+        return service.getEvent(id);
+    }
+
 }
+
+
