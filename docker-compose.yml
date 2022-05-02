@@ -6,6 +6,8 @@ services:
     volumes:
       - "./db/script:/docker-entrypoint-initdb.d/"
       - "./db/data:/var/lib/mysql"
+    environment:
+      - TZ=Asia/Bangkok
 
   backend:
     build:
