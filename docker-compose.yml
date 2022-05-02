@@ -2,12 +2,17 @@ version: "3"
 
 services:
   db:
-    image: mysql/mysql-server
+    build: "./db"
     volumes:
-      - "./db/script:/docker-entrypoint-initdb.d/"
       - "./db/data:/var/lib/mysql"
+      - "./db/scripts:/tests"
+    ports:
+      - "3307:3306"
+    env_file:
+      - "./db/.env"
     environment:
       - TZ=Asia/Bangkok
+      - LANG=C.UTF-8
 
   backend:
     build:

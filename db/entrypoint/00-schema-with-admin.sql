@@ -54,22 +54,5 @@ SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
 
 
-use oasip;
-
-insert into eventCategory (eventCategoryName, eventDuration) values 
-    ('Frontend', 30),
-    ('Backend', 30),
-    ('Database', 30),
-    ('DevOps', 30),
-    ('Project Management', 30);
-
-insert into event (bookingName, bookingEmail, eventStartTime, eventDuration, eventNotes, eventCategoryId) values 
-    ('Manee Meerai', 'maneemeerai@gmail.com', '2022-04-25 11:00:00',45, 'Where am I going? Help.', 2),
-    ('Somchai Jaidee', 'somchai007@gmail.com', '2022-04-26 09:00:00',30, null, 1),
-    ('Thanawat Naeching', 'thanawat@gmail.com', '2022-04-27 10:00:00',15, 'bing bong', 5),
-    ('Tawan Muadmuenwai', 'tawan@gmail.com', '2022-05-27 23:00:00', 30, 'brrrrrr', 2),
-    ('Manassinee Vejvithan', 'manassinee@gmail.com', '2022-05-28 11:00:00', 25, 'wat now', 3);
-
-
 CREATE USER 'us3admin'@'%' IDENTIFIED BY '123456';
 GRANT ALL PRIVILEGES ON *.* TO 'us3admin'@'%' WITH GRANT OPTION;
