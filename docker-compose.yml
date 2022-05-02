@@ -6,8 +6,6 @@ services:
     volumes:
       - "./db/data:/var/lib/mysql"
       - "./db/scripts:/tests"
-    ports:
-      - "3307:3306"
     env_file:
       - "./db/.env"
     environment:
