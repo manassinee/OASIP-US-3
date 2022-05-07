@@ -1,4 +1,4 @@
-// import { createRouter, createWebHistory } from "vue-router";
+// import { createRouter, createWebHistory } from 'vue-router';
 // import Events from "../views/Event.vue";
 // import CreateEvent from "../views/CreateEvent.vue";
 
