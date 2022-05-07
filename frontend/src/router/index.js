@@ -1,25 +1,25 @@
-// import { createRouter, createWebHistory } from 'vue-router';
-// import Events from "../views/Event.vue";
-// import CreateEvent from "../views/CreateEvent.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import CreateEvent from "../views/CreateEvent.vue";
+import Events from "../views/Events.vue";
 
-// const history = createWebHistory();
+const history = createWebHistory();
 
-// const routes = [
-//   {
-//     path: "/",
-//     name: "home",
-//     component: Events,
-//   },
-//   {
-//     path: "/create-event",
-//     name: "createEvent",
-//     component: CreateEvent,
-//   },
-// ];
+const routes = [
+  {
+    path: "/",
+    name: "home",
+    component: Events,
+  },
+  {
+    path: "/create-event",
+    name: "createEvent",
+    component: CreateEvent,
+  },
+];
 
-// const router = createRouter({
-//   history,
-//   routes,
-// });
+const router = createRouter({
+  history,
+  routes,
+});
 
-// export default router;
+export default router;

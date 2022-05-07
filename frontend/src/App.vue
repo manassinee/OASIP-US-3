@@ -1,11 +1,8 @@
 <script setup>
-import Events from './views/Events.vue'
-import CreateEvent from './views/CreateEvent.vue';
 </script>
  
 <template>
-<!-- <Events /> -->
-<CreateEvent />
+<router-view></router-view>
 </template>
  
 <style scoped>
