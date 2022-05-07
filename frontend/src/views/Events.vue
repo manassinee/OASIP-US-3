@@ -1,24 +1,10 @@
 <script setup>
 import { onBeforeMount, ref } from 'vue';
 import EventPopup from '../components/EventPopup.vue';
+import { getEvents } from '../service/api';
+import { sortDescendingByDateInPlace } from '../utils';
+
 const events = ref([])
-
-const baseUrl = import.meta.env.PROD ? import.meta.env.VITE_API_URL : '/api';
-
-function makeUrl(path) {
-  return `${baseUrl}${path}`;
-}
-
-//GET 
-async function getEvents() {
-  const response = await fetch(makeUrl('/events'));
-  if (response.status === 200) {
-    const data = await response.json()
-    return data;
-  } else {
-    console.log('Cannot fetch events');
-  }
-}
 
 onBeforeMount(async () => {
   const e = await getEvents();
@@ -26,12 +12,6 @@ onBeforeMount(async () => {
 
   events.value = e;
 });
-
-function sortDescendingByDateInPlace(arr, keyExtractor) {
-  return arr.sort((a, b) => {
-    return new Date(keyExtractor(b)).getTime() - new Date(keyExtractor(a)).getTime();
-  });
-}
 
 const currentEvent = ref({});
 </script>
