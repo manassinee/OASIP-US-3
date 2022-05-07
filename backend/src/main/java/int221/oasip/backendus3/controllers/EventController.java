@@ -1,12 +1,11 @@
 package int221.oasip.backendus3.controllers;
 
+import int221.oasip.backendus3.dtos.EventDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.services.EventService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,6 +23,12 @@ public class EventController {
         return service.getEvent(id);
     }
 
+    @PostMapping("")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Event create(@RequestBody EventDTO newEvent){
+        return service.save(newEvent);
+    }
+
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable Integer id){ service.delete(id); }
 }
-
-
