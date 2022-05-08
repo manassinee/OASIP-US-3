@@ -22,19 +22,22 @@ async function handleSubmit() {
   const event = {
     bookingName: bookingName.value,
     bookingEmail: bookingEmail.value,
+
     // from 2022-02-02T02:02 to 2022-02-02T02:02:00Z (append the ':00Z')
     eventStartTime: new Date(eventStartTime.value).toISOString(),
+
     eventCategoryId: eventCategory.value.id,
     eventNotes: eventNotes.value
   }
 
   const createdEvent = await createEvent(event);
   if (createdEvent) {
-      bookingName = '';
-      bookingEmail = '';
-      eventStartTime = '';
-      eventCategoryId = '';
-      eventNotes = '';
+    bookingName.value = '';
+    bookingEmail.value = '';
+    eventStartTime.value = '';
+    eventCategory.value = '';
+    eventNotes.value = '';
+    alert('Successfully created the event');
   } else {
     alert('Sorry, something went wrong');
   }
