@@ -4,6 +4,7 @@ function makeUrl(path) {
   return `${baseUrl}${path}`;
 }
 
+//GET
 export async function getEvents() {
   const response = await fetch(makeUrl("/events"));
   if (response.status === 200) {
@@ -24,6 +25,7 @@ export async function getCategories() {
   }
 }
 
+//CREATE
 export async function createEvent(newEvent) {
   const response = await fetch(makeUrl("/events"), {
     method: "POST",
@@ -37,5 +39,19 @@ export async function createEvent(newEvent) {
     return addedEvent;
   } else {
     console.log("Cannot create event");
+  }
+}
+
+//DELETE
+export async function deleteEvent(id) {
+  const response = await fetch(makeUrl(`/events/${id}`), {
+    method: "DELETE"
+  });
+
+  if (response.status === 200) {
+    return true;
+  } else {
+    console.log("Cannot delete event");
+    return false;
   }
 }

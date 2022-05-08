@@ -1,7 +1,7 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
 import EventPopup from "../components/EventPopup.vue";
-import { getEvents } from "../service/api";
+import { getEvents, deleteEvent } from "../service/api";
 import { sortDescendingByDateInPlace } from "../utils";
 
 const events = ref([]);
@@ -14,6 +14,21 @@ onBeforeMount(async () => {
 });
 
 const currentEvent = ref({});
+
+async function cancelEvent(event) {
+  if (!confirm(`Cancel event #${event.id} ${event.bookingName}?`)) {
+    return;
+  }
+
+  const isSuccess = await deleteEvent(event.id);
+  if (isSuccess) {
+    alert(`Delete successfully`);
+    events.value = events.value.filter((e) => e.id !== event.id);
+  } else {
+    alert('Sorry, something went wrong');
+  }
+
+}
 </script>
 
 <template>
@@ -28,6 +43,7 @@ const currentEvent = ref({});
           <th class="px-6 py-3">Start Time</th>
           <th class="px-6 py-3">Duration (mins)</th>
           <th class="px-6 py-3">Category</th>
+          <th class="px-6 py-3">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -49,6 +65,9 @@ const currentEvent = ref({});
           </td>
           <td class="py-2 px-2">{{ event.eventDuration }}</td>
           <td class="py-2 px-2">{{ event.eventCategory.eventCategoryName }}</td>
+          <td class="py-2 px-2">
+            <button class="relative text-red-400 z-50" @click="cancelEvent(event)">Delete</button>
+          </td>
         </tr>
         <tr v-else>
           <td colspan="5" class="p-6 text-center">No Scheduled Event</td>
