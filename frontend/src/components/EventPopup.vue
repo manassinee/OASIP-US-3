@@ -57,7 +57,7 @@ function formatTime(date) {
         <p class="text-gray-500">{{ props.email }}</p>
       </div>
 
-      <div class="text-sm text-pink-600 font-semibold rounded-lg bg-pink-50 px-3 py self-baseline mb-2">{{
+      <div class="text-sm text-sky-600 font-semibold rounded-lg bg-sky-50 px-3 py self-baseline mb-2">{{
           props.category
       }}
       </div>
