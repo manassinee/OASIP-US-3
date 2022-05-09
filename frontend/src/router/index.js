@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import CreateEvent from "../views/CreateEvent.vue";
 import Events from "../views/Events.vue";
 
-const history = createWebHistory();
+const history = createWebHistory(import.meta.env.BASE_URL);
 
 const routes = [
   {
