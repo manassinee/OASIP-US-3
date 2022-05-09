@@ -1,5 +1,6 @@
 <script setup>
 import { formatDateAndFromToTime } from '../utils';
+import Badge from './Badge.vue';
 
 const props = defineProps({
   currentEvent: {
@@ -26,10 +27,7 @@ const emits = defineEmits([
       <p class="text-gray-500">{{ props.currentEvent.bookingEmail }}</p>
     </div>
 
-    <div class="text-sm text-sky-600 font-semibold rounded-lg bg-sky-50 px-3 py self-baseline mb-2">{{
-        props.currentEvent.eventCategory.eventCategoryName
-    }}
-    </div>
+    <Badge :text="props.currentEvent.eventCategory.eventCategoryName" class="self-baseline mb-2" />
 
     <div>
       <p>{{ formatDateAndFromToTime(props.currentEvent.eventStartTime, props.currentEvent.eventDuration) }}</p>

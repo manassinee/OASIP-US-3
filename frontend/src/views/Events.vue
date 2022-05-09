@@ -3,6 +3,7 @@ import { onBeforeMount, ref } from "vue";
 import EventDetails from "../components/EventDetails.vue";
 import { deleteEvent, getEvents } from "../service/api";
 import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
+import Badge from "../components/Badge.vue";
 
 
 const events = ref([]);
@@ -76,9 +77,7 @@ function formatDateTime(date) {
 
               <td class="py-2 px-2">
                 <div class="flex">
-                  <div class="text-sm text-sky-600 font-semibold rounded-lg bg-sky-50 px-3">
-                    {{ event.eventCategory.eventCategoryName }}
-                  </div>
+                  <Badge :text="event.eventCategory.eventCategoryName" />
                 </div>
               </td>
 
