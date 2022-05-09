@@ -1,6 +1,6 @@
 <script setup>
 import { onBeforeMount, ref, watch } from "vue";
-import { getCategories, createEvent } from "../service/api";
+import { createEvent, getCategories } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
 
 const bookingName = ref('');
@@ -61,7 +61,7 @@ watch(eventStartTime, (d) => {
   <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="eventStartTime" required class="bg-gray-100 p-2">
       
   <label for="category">Event Category </label>
-  <select v-model="eventCategory" class="bg-gray-100 p-2">
+  <select v-model="eventCategory" required class="bg-gray-100 p-2">
     <option v-for="category in categories" :value="category">{{ category.eventCategoryName }} - ({{ category.eventDuration }} minutes)</option>
   </select>
 
