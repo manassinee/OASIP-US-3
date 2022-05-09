@@ -47,7 +47,7 @@ function formatDateTime(date) {
           <thead class="text-xs text-sky-500 uppercase bg-sky-50 text-left">
             <tr class="text-sky-600">
               <th class="pl-2 py-3">Name</th>
-              <th class="pl-2 py-3">Schedule</th>
+              <th class="pl-2 py-3">Date & Time</th>
               <th class="pl-2 py-3">Category</th>
               <th class="pl-2 py-3">Action</th>
             </tr>
@@ -96,7 +96,7 @@ function formatDateTime(date) {
 
             </tr>
             <tr v-else>
-              <td colspan="5" class="p-6 text-center">No Scheduled Event</td>
+              <td colspan="4" class="p-6 text-center">No Scheduled Event</td>
             </tr>
           </tbody>
 
