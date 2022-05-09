@@ -2,8 +2,7 @@
 import { onBeforeMount, ref } from "vue";
 import EventDetails from "../components/EventDetails.vue";
 import { deleteEvent, getEvents } from "../service/api";
-import { sortDescendingByDateInPlace } from "../utils";
-import { formatDate, formatTime } from '../utils';
+import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
 
 
 const events = ref([]);
@@ -43,20 +42,20 @@ function formatDateTime(date) {
     <div class="flex flex-col">
       <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
       <div class="flex">
-        <table class="table-fixed text-md text-left w-8/12 flex-1">
+        <table class="table-fixed text-left w-8/12 flex-1">
 
-          <thead class="text-xs text-sky-500 uppercase bg-sky-50">
+          <thead class="text-xs text-sky-500 uppercase bg-sky-50 text-left">
             <tr class="text-sky-600">
-              <th class="px-6 py-3">Name</th>
-              <th class="px-6 py-3">Schedule</th>
-              <th class="px-6 py-3">Category</th>
-              <th class="px-6 py-3">Action</th>
+              <th class="pl-2 py-3">Name</th>
+              <th class="pl-2 py-3">Schedule</th>
+              <th class="pl-2 py-3">Category</th>
+              <th class="pl-2 py-3">Action</th>
             </tr>
           </thead>
 
           <tbody>
             <tr v-if="events.length > 0" v-for="event in events" @click="currentEvent = event"
-              class="my-10 blockbg-white rounded-lg shadow-md relative cursor-pointer hover:bg-gray-50 transition box-border"
+              class="my-10 bg-white rounded-lg border-b border-gray-200 shadow-black/5 relative cursor-pointer hover:bg-gray-50 transition box-border"
               :class="[
                 {
                   'z-10 bg-blue-200/10 hover:bg-blue-200/20 ring-2 ring-blue-400/50 ':
@@ -84,7 +83,15 @@ function formatDateTime(date) {
               </td>
 
               <td class="py-2 px-2">
-                <button class="text-red-400 z-50" @click.stop="cancelEvent(event)">Delete</button>
+                <div class="flex">
+                  <button @click.stop="cancelEvent(event)"
+                    class="bg-white text-red-500 text-xs flex items-center border border-rose-500 px-1 py-0.5 rounded-md hover:bg-rose-500 hover:text-white transition">
+                    <span class="material-symbols-outlined">
+                      delete
+                    </span>
+                    <span>Delete</span>
+                  </button>
+                </div>
               </td>
 
             </tr>
