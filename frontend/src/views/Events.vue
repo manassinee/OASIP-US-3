@@ -43,7 +43,7 @@ function formatDateTime(date) {
     <div class="flex flex-col">
       <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
       <div class="flex">
-        <table class="table-fixed text-left w-8/12 flex-1">
+        <table class="table-fixed text-left w-8/12 flex-1 break-words">
 
           <thead class="text-xs text-sky-500 uppercase bg-sky-50 text-left">
             <tr class="text-sky-600">
