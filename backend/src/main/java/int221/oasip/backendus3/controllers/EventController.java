@@ -1,5 +1,6 @@
 package int221.oasip.backendus3.controllers;
 
+import int221.oasip.backendus3.dtos.EditDTO;
 import int221.oasip.backendus3.dtos.EventDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.services.EventService;
@@ -31,4 +32,9 @@ public class EventController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Integer id){ service.delete(id); }
+
+    @PutMapping("/{id}")
+    public Event update(@PathVariable Integer id, @RequestBody EditDTO editEvent) {
+        return service.update(id, editEvent);
+    }
 }

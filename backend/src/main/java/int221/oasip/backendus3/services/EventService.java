@@ -1,5 +1,6 @@
 package int221.oasip.backendus3.services;
 
+import int221.oasip.backendus3.dtos.EditDTO;
 import int221.oasip.backendus3.dtos.EventDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.entities.EventCategory;
@@ -49,5 +50,26 @@ public class EventService {
 
     public void delete(Integer id) {
         repository.deleteById(id);
+    }
+
+    public Event update(Integer id, EditDTO editEvent) {
+        // get event
+        Optional<Event> e = repository.findById(id);
+
+        // set event fields
+        if (e.isPresent()) {
+            Event event = e.get();
+
+            if (editEvent.getEventNotes() != null) {
+                event.setEventNotes(editEvent.getEventNotes());
+            }
+            if (editEvent.getEventStartTime() != null) {
+                event.setEventStartTime(editEvent.getEventStartTime());
+            }
+
+            return repository.saveAndFlush(event);
+        }
+
+        return null;
     }
 }
