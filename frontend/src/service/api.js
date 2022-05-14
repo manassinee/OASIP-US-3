@@ -55,3 +55,20 @@ export async function deleteEvent(id) {
     return false;
   }
 }
+
+
+export async function updateEvent(id, editEvent) {
+  const response = await fetch(makeUrl(`/events/${id}`), {
+    method: "PUT",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify(editEvent)
+  });
+  if (response.status === 200) {
+    const updatedEvent = await response.json();
+    return updatedEvent;
+  } else {
+    console.log("Cannot edit event");
+  }
+}
