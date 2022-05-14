@@ -6,6 +6,7 @@ import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.services.EventService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class EventController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public Event create(@RequestBody EventDTO newEvent){
+    public Event create(@Validated @RequestBody EventDTO newEvent){
         return service.save(newEvent);
     }
 
@@ -34,7 +35,7 @@ public class EventController {
     public void delete(@PathVariable Integer id){ service.delete(id); }
 
     @PutMapping("/{id}")
-    public Event update(@PathVariable Integer id, @RequestBody EditDTO editEvent) {
+    public Event update(@PathVariable Integer id, @Validated  @RequestBody EditDTO editEvent) {
         return service.update(id, editEvent);
     }
 }
