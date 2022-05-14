@@ -1,7 +1,7 @@
 package int221.oasip.backendus3.controllers;
 
-import int221.oasip.backendus3.dtos.EditDTO;
-import int221.oasip.backendus3.dtos.EventDTO;
+import int221.oasip.backendus3.dtos.EditEventRequestDTO;
+import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.services.EventService;
 import lombok.AllArgsConstructor;
@@ -27,7 +27,7 @@ public class EventController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public Event create(@Validated @RequestBody EventDTO newEvent){
+    public Event create(@Validated @RequestBody CreateEventRequestDTO newEvent){
         return service.save(newEvent);
     }
 
@@ -35,7 +35,7 @@ public class EventController {
     public void delete(@PathVariable Integer id){ service.delete(id); }
 
     @PutMapping("/{id}")
-    public Event update(@PathVariable Integer id, @Validated  @RequestBody EditDTO editEvent) {
+    public Event update(@PathVariable Integer id, @Validated  @RequestBody EditEventRequestDTO editEvent) {
         return service.update(id, editEvent);
     }
 }

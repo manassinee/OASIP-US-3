@@ -1,7 +1,7 @@
 package int221.oasip.backendus3.services;
 
-import int221.oasip.backendus3.dtos.EditDTO;
-import int221.oasip.backendus3.dtos.EventDTO;
+import int221.oasip.backendus3.dtos.EditEventRequestDTO;
+import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.entities.EventCategory;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
@@ -31,7 +31,7 @@ public class EventService {
         return event.orElse(null);
     }
 
-    public Event save(EventDTO newEvent) {
+    public Event save(CreateEventRequestDTO newEvent) {
         Event e = modelMapper.map(newEvent, Event.class);
         Optional<EventCategory> ec = categoryRepository.findById(newEvent.getEventCategoryId());
 
@@ -52,7 +52,7 @@ public class EventService {
         repository.deleteById(id);
     }
 
-    public Event update(Integer id, EditDTO editEvent) {
+    public Event update(Integer id, EditEventRequestDTO editEvent) {
         // get event
         Optional<Event> e = repository.findById(id);
 

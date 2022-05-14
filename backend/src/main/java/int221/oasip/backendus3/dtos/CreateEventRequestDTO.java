@@ -10,7 +10,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
-public class EventDTO {
+public class CreateEventRequestDTO {
     @NotNull
     private Integer eventCategoryId;
 

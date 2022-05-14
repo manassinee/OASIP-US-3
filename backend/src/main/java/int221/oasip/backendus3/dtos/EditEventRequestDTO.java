@@ -8,7 +8,7 @@ import java.time.Instant;
 
 @Getter
 @Setter
-public class EditDTO {
+public class EditEventRequestDTO {
     private Instant eventStartTime;
 
     @Size(max = 500, message = "Event notes must be less than 500 characters")
