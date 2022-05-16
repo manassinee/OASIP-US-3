@@ -34,9 +34,12 @@ export async function createEvent(newEvent) {
     },
     body: JSON.stringify(newEvent),
   });
+
+  const data = await response.json();
   if (response.status === 201) {
-    const addedEvent = await response.json();
-    return addedEvent;
+    return data;
+  } else if (response.status === 400) {
+    throw data;
   } else {
     console.log("Cannot create event");
   }
