@@ -28,13 +28,19 @@ services:
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=oasip
 
-  nginx:
+  frontend:
     build:
       context: "./frontend"
       args:
         - VITE_API_URL=/us3/api
         - BASE_URL=/us3
+    depends_on:
+      - backend
+
+  nginx:
+    build: "./nginx"
     ports:
       - "80:80"
     depends_on:
+      - frontend
       - backend
