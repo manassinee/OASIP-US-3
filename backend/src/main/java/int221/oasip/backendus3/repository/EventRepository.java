@@ -13,7 +13,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     // 1. events that started before the startTime and ended after the startTime
     // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
     @Query(nativeQuery = true,
-            value = "SELECT * FROM Event e WHERE " +
+            value = "SELECT * FROM event e WHERE " +
                     "e.eventCategoryId = ?3 AND " +
                     "((e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
                     "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2))")
