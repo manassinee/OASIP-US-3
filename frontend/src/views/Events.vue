@@ -1,11 +1,14 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
 import EventDetails from "../components/EventDetails.vue";
-import { deleteEvent, getEvents } from "../service/api";
+import { deleteEvent, getEvents, updateEvent } from "../service/api";
 import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
+import Badge from "../components/Badge.vue";
+import EditEvent from "../components/EditEvent.vue";
 
 
 const events = ref([]);
+const currentEvent = ref({});
 
 onBeforeMount(async () => {
   const e = await getEvents();
@@ -14,9 +17,11 @@ onBeforeMount(async () => {
   events.value = e;
 });
 
-const currentEvent = ref({});
 
 async function cancelEvent(event) {
+  if (isEditing.value) {
+    return;
+  }
   if (!confirm(`Cancel event #${event.id} ${event.bookingName}?`)) {
     return;
   }
@@ -31,8 +36,42 @@ async function cancelEvent(event) {
 
 }
 
+function selectEvent(event) {
+  if (isEditing.value) {
+    return;
+  }
+  currentEvent.value = event;
+}
+
+const isEditing = ref(false)
+function startEdit(event) {
+  if (isEditing.value) {
+    return;
+  }
+  currentEvent.value = event;
+  isEditing.value = true;
+}
+
+function stopEdit() {
+  currentEvent.value = {};
+  isEditing.value = false;
+}
+
 function formatDateTime(date) {
   return `${formatDate(date)} ${formatTime(date)} `;
+}
+
+async function saveEvent(updates) {
+  // console.log(updates);
+  const selectedEventId = currentEvent.value.id;
+  const updatedEvent = await updateEvent(selectedEventId, updates);
+  if (updatedEvent) {
+    const event = events.value.find((e) => e.id === selectedEventId);
+    event.eventStartTime = updatedEvent.eventStartTime;
+    event.eventNotes = updatedEvent.eventNotes;
+
+    isEditing.value = false;
+  }
 }
 </script>
 
@@ -42,7 +81,7 @@ function formatDateTime(date) {
     <div class="flex flex-col">
       <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
       <div class="flex">
-        <table class="table-fixed text-left w-8/12 flex-1">
+        <table class="table-fixed text-left w-8/12 flex-1 break-words">
 
           <thead class="text-xs text-sky-500 uppercase bg-sky-50 text-left">
             <tr class="text-sky-600">
@@ -54,7 +93,7 @@ function formatDateTime(date) {
           </thead>
 
           <tbody>
-            <tr v-if="events.length > 0" v-for="event in events" @click="currentEvent = event"
+            <tr v-if="events.length > 0" v-for="event in events" @click="selectEvent(event)"
               class="my-10 bg-white rounded-lg border-b border-gray-200 shadow-black/5 relative cursor-pointer hover:bg-gray-50 transition box-border"
               :class="[
                 {
@@ -76,20 +115,26 @@ function formatDateTime(date) {
 
               <td class="py-2 px-2">
                 <div class="flex">
-                  <div class="text-sm text-sky-600 font-semibold rounded-lg bg-sky-50 px-3">
-                    {{ event.eventCategory.eventCategoryName }}
-                  </div>
+                  <Badge :text="event.eventCategory.eventCategoryName" />
                 </div>
               </td>
 
               <td class="py-2 px-2">
-                <div class="flex">
+                <div class="flex space-x-4">
                   <button @click.stop="cancelEvent(event)"
                     class="bg-white text-red-500 text-xs flex items-center border border-rose-500 px-1 py-0.5 rounded-md hover:bg-rose-500 hover:text-white transition">
                     <span class="material-symbols-outlined">
                       delete
                     </span>
                     <span>Delete</span>
+                  </button>
+
+                  <button @click.stop="startEdit(event)"
+                    class="bg-white text-amber-500 text-xs flex items-center border border-yellow-500 px-1 py-0.5 rounded-md hover:bg-yellow-500 hover:text-white transition">
+                    <span class="material-symbols-outlined">
+                      edit
+                    </span>
+                    <span>Edit</span>
                   </button>
                 </div>
               </td>
@@ -103,11 +148,11 @@ function formatDateTime(date) {
         </table>
 
         <div class="p-4 bg-gray-100 relative w-4/12" v-if="currentEvent.id">
-          <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" />
+          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @close="stopEdit" v-if="isEditing" @save="saveEvent" />
+          <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
         </div>
       </div>
     </div>
-
   </div>
 </template>
 

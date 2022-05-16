@@ -1,15 +1,21 @@
 <script setup>
 import { onBeforeMount, ref, watch } from "vue";
-import { createEvent, getCategories } from "../service/api";
+import { createEvent, getCategories, getEventsByCategoryIdOnDate } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
 
-const bookingName = ref('');
-const bookingEmail = ref('')
-const eventStartTime = ref('')
-const eventCategory = ref('');
-const eventNotes = ref('');
-
+// init inputs with default values
+const inputs = ref(makeDefaultValues());
 const categories = ref([]);
+
+function makeDefaultValues() {
+  return {
+    bookingName: '',
+    bookingEmail: '',
+    eventStartTime: '',
+    eventCategoryId: '',
+    eventNotes: ''
+  };
+}
 
 onBeforeMount(async () => {
   categories.value = await getCategories();
@@ -17,62 +23,226 @@ onBeforeMount(async () => {
 
 // format: 2022-02-02T02:02
 const minDateTImeLocal = formatDateTimeLocal(new Date());
+const existingEventsForSelectedCategoryAndDate = ref([]);
 
 async function handleSubmit() {
-  const event = {
-    bookingName: bookingName.value,
-    bookingEmail: bookingEmail.value,
+  const canSubmit = Object.values(errors.value).every((error) => error.length === 0);
 
-    // from 2022-02-02T02:02 to 2022-02-02T02:02:00Z (append the ':00Z')
-    eventStartTime: new Date(eventStartTime.value).toISOString(),
-
-    eventCategoryId: eventCategory.value.id,
-    eventNotes: eventNotes.value
+  if (!canSubmit) {
+    return;
   }
 
-  const createdEvent = await createEvent(event);
-  if (createdEvent) {
-    bookingName.value = '';
-    bookingEmail.value = '';
-    eventStartTime.value = '';
-    eventCategory.value = '';
-    eventNotes.value = '';
-    alert('Successfully created the event');
-  } else {
-    alert('Sorry, something went wrong');
+  const event = {
+    ...inputs.value,
+
+    // convert local time to UTC in ISO-8601 format
+    eventStartTime: new Date(inputs.value.eventStartTime).toISOString(),
+  };
+
+  try {
+    const createdEvent = await createEvent(event);
+
+    if (createdEvent) {
+      // clear inputs
+      inputs.value = makeDefaultValues();
+      alert('Successfully created the event');
+    } else {
+      alert('Sorry, something went wrong');
+    }
+  } catch (errorResponse) {
+    if (errorResponse.status !== 400) {
+      return;
+    }
+
+    Object.assign(errors.value, errorResponse.errors);
   }
 }
 
-watch(eventStartTime, (d) => {
-  console.log(d);
+const errors = ref({
+  bookingName: [],
+  bookingEmail: [],
+  eventStartTime: [],
+  eventNotes: []
 });
+
+function validateBookingName(e) {
+  const bookingName = e.target.value;
+  errors.value.bookingName = [];
+
+  if (bookingName.length > 100) {
+    errors.value.bookingName.push("Booking name must be less than 100 characters");
+  }
+
+  if (bookingName.trim().length === 0) {
+    errors.value.bookingName.push("Booking name must not be blank");
+  }
+}
+
+function validateBookingEmail(e) {
+  const bookingEmail = e.target.value;
+  errors.value.bookingEmail = [];
+
+  if (bookingEmail.length > 50) {
+    errors.value.bookingEmail.push("Booking email must be less than 50 characters");
+  }
+
+  if (bookingEmail.trim().length === 0) {
+    errors.value.bookingEmail.push("Booking email must not be blank");
+  }
+
+  // RFC2822 https://regexr.com/2rhq7
+  const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+  if (!emailRegex.test(bookingEmail)) {
+    errors.value.bookingEmail.push("Booking email is invalid");
+  }
+}
+
+const debouncedValidateOverlap = debounce(validateOverlap, 200);
+
+function validateStartTime() {
+  console.log('validateStartTime');
+  const eventStartTime = inputs.value.eventStartTime;
+  console.log(eventStartTime);
+  const category = categories.value.find((c) => c.id === inputs.value.eventCategoryId);
+  if (!category || !eventStartTime) {
+    return;
+  }
+
+  const now = new Date();
+  const startTime = new Date(eventStartTime);
+  errors.value.eventStartTime = [];
+
+  if (startTime.getTime() <= now.getTime()) {
+    errors.value.eventStartTime.push("Start time must be in the future")
+  }
+
+  debouncedValidateOverlap(eventStartTime, category.id, category.eventDuration);
+}
+
+function validateEventNotes(e) {
+  const eventNotes = e.target.value;
+  errors.value.eventNotes = [];
+
+  if (eventNotes.length > 500) {
+    errors.value.eventNotes.push("Booking note must be less than 500 characters");
+  }
+}
+
+// fetch scheduled events when startTime or categoryId changes
+async function validateOverlap(eventStartTime, categoryId, categoryDuration) {
+  console.log('validateOverlap');
+  const date = new Date(eventStartTime);
+  const formattedDate = `${date.getFullYear().toString().padStart(4, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  let hasOverlappingEvents = false;
+
+  console.log('------- Checking for overlaps -------');
+  
+  if (eventStartTime && categoryId) {
+    existingEventsForSelectedCategoryAndDate.value = await getEventsByCategoryIdOnDate(categoryId, formattedDate);
+    console.log(existingEventsForSelectedCategoryAndDate.value);
+
+    const startTime = new Date(eventStartTime);
+    console.log('startTime', startTime);
+    const endTime = new Date(startTime);
+    endTime.setMinutes(startTime.getMinutes() + categoryDuration);
+    console.log('endTime', endTime);
+
+    existingEventsForSelectedCategoryAndDate.value.forEach(event => {
+      const scStartTime = new Date(event.eventStartTime);
+      const scEndTime = new Date(event.eventStartTime);
+      scEndTime.setMinutes(scEndTime.getMinutes() + event.eventDuration);
+
+      console.log('scStartTime', scStartTime);
+      console.log('scEndTime', scEndTime);
+
+    // all overlap events. there are two scenarios:
+    // 1. events that started before the startTime and ended after the startTime
+    // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
+    // @Query(nativeQuery = true,
+    //     value = "SELECT * FROM Event e WHERE " +
+    //             "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
+    //             "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2)")
+
+    const isPastOverlap = scStartTime.getTime() < startTime.getTime() && scEndTime.getTime() > startTime.getTime();
+    const isFutureOverlap = scStartTime.getTime() >= startTime.getTime() && scStartTime.getTime() < endTime.getTime()
+    console.log('isPastOverlap', isPastOverlap);
+    console.log('isFutureOverlap', isFutureOverlap);
+
+    if (isPastOverlap || isFutureOverlap) {
+      console.log('overlap', event);
+      hasOverlappingEvents = true;
+      
+    } else {
+      console.log('no overlap');
+    }
+    });
+  }
+
+  if (hasOverlappingEvents) {
+    errors.value.eventStartTime.push(`Start time overlaps with other event(s)`);
+  }
+}
+
+function debounce(func, ms) {
+    let timer;
+    return function(...args) {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      timer = setTimeout(() => {
+        func.apply(this, args);
+      }, ms);
+    };
+  }
+  
+
+watch(inputs.value, (val) => console.log(val))
+
 </script>
  
 <template>
-<div>
-<form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-  <label for="name">Booking Name </label>
-  <input id="name" type="text" v-model="bookingName" required class="bg-gray-100 p-2">
-  
-  <label for="email">Booking Email </label>
-  <input id="email" type="email" v-model="bookingEmail" required class="bg-gray-100 p-2">
-  
-  <label for="startTime">Event Start Time </label>
-  <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="eventStartTime" required class="bg-gray-100 p-2">
-      
-  <label for="category">Event Category </label>
-  <select v-model="eventCategory" required class="bg-gray-100 p-2">
-    <option v-for="category in categories" :value="category">{{ category.eventCategoryName }} - ({{ category.eventDuration }} minutes)</option>
-  </select>
+  <div>
+    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
+      <label for="name">Booking Name </label>
+      <input id="name" type="text" v-model="inputs.bookingName" required class="bg-gray-100 p-2"
+      @input="validateBookingName">
+      <div v-if="errors.bookingName.length > 0" class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+        <span v-for="error in errors.bookingName">{{ error }}</span>
+      </div>
 
-  <label for="notes">Event Notes (optional)</label>
-  <textarea id="notes" v-model="eventNotes" class="bg-gray-100 p-2"></textarea>
-  
-  <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">submit</button>
-</form>
-</div>
+      <label for="email">Booking Email </label>
+      <input id="email" type="email" v-model="inputs.bookingEmail" required class="bg-gray-100 p-2"
+      @input="validateBookingEmail">
+      <div v-if="errors.bookingEmail.length > 0" class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+        <span v-for="error in errors.bookingEmail">{{ error }}</span>
+      </div>
+
+      <label for="startTime">Event Start Time </label>
+      <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="inputs.eventStartTime" required
+        class="bg-gray-100 p-2" @input="validateStartTime">
+      <div v-if="errors.eventStartTime.length > 0" class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+        <span v-for="error in errors.eventStartTime">{{ error }}</span>
+      </div>
+
+
+      <label for="category">Event Category </label>
+      <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2" @change="validateStartTime">
+        <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} - ({{
+            category.eventDuration
+        }} minutes)</option>
+      </select>
+
+      <label for="notes">Event Notes (optional)</label>
+      <textarea id="notes" v-model="inputs.eventNotes" class="bg-gray-100 p-2"
+       @input="validateEventNotes"></textarea>
+      <div v-if="errors.eventNotes.length > 0" class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+        <span v-for="error in errors.eventNotes">{{ error }}</span>
+      </div>
+
+      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">submit</button>
+    </form>
+  </div>
 </template>
  
 <style scoped>
-
 </style>
