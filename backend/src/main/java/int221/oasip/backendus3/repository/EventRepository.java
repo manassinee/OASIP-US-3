@@ -20,6 +20,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId);
 
     @Query(nativeQuery = true,
-            value = "SELECT * FROM Event e WHERE e.eventCategoryId = ?1 AND DATE(e.eventStartTime) = ?2")
+            value = "SELECT * FROM event e WHERE e.eventCategoryId = ?1 AND DATE(e.eventStartTime) = ?2")
     List<Event> findByCategoryIdOnDate(Integer categoryId, LocalDate date);
 }
