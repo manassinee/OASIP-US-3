@@ -1,12 +1,14 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
 import EventDetails from "../components/EventDetails.vue";
-import { deleteEvent, getEvents } from "../service/api";
+import { deleteEvent, getEvents, updateEvent } from "../service/api";
 import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
 import Badge from "../components/Badge.vue";
+import EditEvent from "../components/EditEvent.vue";
 
 
 const events = ref([]);
+const currentEvent = ref({});
 
 onBeforeMount(async () => {
   const e = await getEvents();
@@ -15,7 +17,6 @@ onBeforeMount(async () => {
   events.value = e;
 });
 
-const currentEvent = ref({});
 
 async function cancelEvent(event) {
   if (!confirm(`Cancel event #${event.id} ${event.bookingName}?`)) {
@@ -32,8 +33,30 @@ async function cancelEvent(event) {
 
 }
 
+const isEditing = ref(false)
+function startEdit(event) {
+  currentEvent.value = event;
+  isEditing.value = true;
+}
+
+function stopEdit() {
+  currentEvent.value = {};
+  isEditing.value = false;
+}
+
 function formatDateTime(date) {
   return `${formatDate(date)} ${formatTime(date)} `;
+}
+
+async function saveEvent(updates) {
+  console.log(updates);
+  const selectedEventId = currentEvent.value.id;
+  const updatedEvent = await updateEvent(selectedEventId, updates);
+  if (updatedEvent) {
+    const event = events.value.find((e) => e.id === selectedEventId);
+    event.eventStartTime = updatedEvent.eventStartTime;
+    event.eventNotes = updatedEvent.evebtNotes;
+  }
 }
 </script>
 
@@ -82,13 +105,21 @@ function formatDateTime(date) {
               </td>
 
               <td class="py-2 px-2">
-                <div class="flex">
+                <div class="flex space-x-4">
                   <button @click.stop="cancelEvent(event)"
                     class="bg-white text-red-500 text-xs flex items-center border border-rose-500 px-1 py-0.5 rounded-md hover:bg-rose-500 hover:text-white transition">
                     <span class="material-symbols-outlined">
                       delete
                     </span>
                     <span>Delete</span>
+                  </button>
+
+                  <button @click.stop="startEdit(event)"
+                    class="bg-white text-amber-500 text-xs flex items-center border border-yellow-500 px-1 py-0.5 rounded-md hover:bg-yellow-500 hover:text-white transition">
+                    <span class="material-symbols-outlined">
+                      edit
+                    </span>
+                    <span>Edit</span>
                   </button>
                 </div>
               </td>
@@ -102,11 +133,11 @@ function formatDateTime(date) {
         </table>
 
         <div class="p-4 bg-gray-100 relative w-4/12" v-if="currentEvent.id">
-          <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" />
+          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @close="stopEdit" v-if="isEditing" @save="saveEvent" />
+          <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
         </div>
       </div>
     </div>
-
   </div>
 </template>
 
