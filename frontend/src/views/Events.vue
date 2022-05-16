@@ -19,6 +19,9 @@ onBeforeMount(async () => {
 
 
 async function cancelEvent(event) {
+  if (isEditing.value) {
+    return;
+  }
   if (!confirm(`Cancel event #${event.id} ${event.bookingName}?`)) {
     return;
   }
@@ -33,8 +36,18 @@ async function cancelEvent(event) {
 
 }
 
+function selectEvent(event) {
+  if (isEditing.value) {
+    return;
+  }
+  currentEvent.value = event;
+}
+
 const isEditing = ref(false)
 function startEdit(event) {
+  if (isEditing.value) {
+    return;
+  }
   currentEvent.value = event;
   isEditing.value = true;
 }
@@ -49,13 +62,15 @@ function formatDateTime(date) {
 }
 
 async function saveEvent(updates) {
-  console.log(updates);
+  // console.log(updates);
   const selectedEventId = currentEvent.value.id;
   const updatedEvent = await updateEvent(selectedEventId, updates);
   if (updatedEvent) {
     const event = events.value.find((e) => e.id === selectedEventId);
     event.eventStartTime = updatedEvent.eventStartTime;
-    event.eventNotes = updatedEvent.evebtNotes;
+    event.eventNotes = updatedEvent.eventNotes;
+
+    isEditing.value = false;
   }
 }
 </script>
@@ -78,7 +93,7 @@ async function saveEvent(updates) {
           </thead>
 
           <tbody>
-            <tr v-if="events.length > 0" v-for="event in events" @click="currentEvent = event"
+            <tr v-if="events.length > 0" v-for="event in events" @click="selectEvent(event)"
               class="my-10 bg-white rounded-lg border-b border-gray-200 shadow-black/5 relative cursor-pointer hover:bg-gray-50 transition box-border"
               :class="[
                 {
