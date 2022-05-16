@@ -1,6 +1,6 @@
 <script setup>
-import { onBeforeMount, ref, watch } from "vue";
-import { createEvent, getCategories } from "../service/api";
+import { onBeforeMount, ref, watch, watchEffect } from "vue";
+import { createEvent, getCategories, getEventsByCategoryIdOnDate } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
 
 // init inputs with default values
@@ -12,7 +12,7 @@ function makeDefaultValues() {
     bookingName: '',
     bookingEmail: '',
     eventStartTime: '',
-    eventCategoryId: '',
+    eventCategory: '',
     eventNotes: ''
   };
 }
@@ -23,6 +23,7 @@ onBeforeMount(async () => {
 
 // format: 2022-02-02T02:02
 const minDateTImeLocal = formatDateTimeLocal(new Date());
+const existingEventsForSelectedCategoryAndDate = ref([]);
 
 async function handleSubmit() {
   const canSubmit = Object.values(errors.value).every((error) => error.length === 0);
@@ -36,6 +37,7 @@ async function handleSubmit() {
 
     // convert local time to UTC in ISO-8601 format
     eventStartTime: new Date(inputs.value.eventStartTime).toISOString(),
+    eventCategoryId: Number(inputs.value.eventCategory.id),
   };
 
   try {
@@ -116,6 +118,65 @@ function validateEventNotes(e) {
   }
 }
 
+// fetch scheduled events when startTime or categoryId changes
+watchEffect(async () => {
+  const { eventStartTime, eventCategory } = inputs.value;
+  const date = new Date(eventStartTime);
+  const formattedDate = `${date.getFullYear().toString().padStart(4, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}`;
+  const eventCategoryId = eventCategory?.id;
+  errors.value.eventStartTime = [];
+  let hasOverlappingEvents = false;
+
+  console.log('------- Checking for overlaps -------');
+  
+  if (eventStartTime && eventCategoryId) {
+    existingEventsForSelectedCategoryAndDate.value = await getEventsByCategoryIdOnDate(eventCategoryId, formattedDate);
+    console.log(existingEventsForSelectedCategoryAndDate.value);
+
+    const startTime = new Date(eventStartTime);
+    console.log('startTime', startTime);
+    const endTime = new Date(startTime);
+    endTime.setMinutes(startTime.getMinutes() + eventCategory.eventDuration);
+    console.log('endTime', endTime);
+
+    existingEventsForSelectedCategoryAndDate.value.forEach(event => {
+      const scStartTime = new Date(event.eventStartTime);
+      const scEndTime = new Date(event.eventStartTime);
+      scEndTime.setMinutes(scEndTime.getMinutes() + event.eventDuration);
+
+      console.log('scStartTime', scStartTime);
+      console.log('scEndTime', scEndTime);
+
+    // all overlap events. there are two scenarios:
+    // 1. events that started before the startTime and ended after the startTime
+    // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
+    // @Query(nativeQuery = true,
+    //     value = "SELECT * FROM Event e WHERE " +
+    //             "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
+    //             "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2)")
+
+    const isPastOverlap = scStartTime.getTime() < startTime.getTime() && scEndTime.getTime() > startTime.getTime();
+    const isFutureOverlap = scStartTime.getTime() >= startTime.getTime() && scStartTime.getTime() < endTime.getTime()
+    console.log('isPastOverlap', isPastOverlap);
+    console.log('isFutureOverlap', isFutureOverlap);
+
+    if (isPastOverlap || isFutureOverlap) {
+      console.log('overlap', event);
+      hasOverlappingEvents = true;
+      
+    } else {
+      console.log('no overlap');
+    }
+    });
+
+    if (hasOverlappingEvents) {
+      errors.value.eventStartTime.push(`Start time overlaps with other event(s)`);
+    }
+  }
+});
+
+watch(inputs.value, (val) => console.log(val))
+
 </script>
  
 <template>
@@ -144,8 +205,8 @@ function validateEventNotes(e) {
 
 
       <label for="category">Event Category </label>
-      <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2">
-        <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} - ({{
+      <select v-model="inputs.eventCategory" required class="bg-gray-100 p-2">
+        <option v-for="category in categories" :value="category">{{ category.eventCategoryName }} - ({{
             category.eventDuration
         }} minutes)</option>
       </select>
