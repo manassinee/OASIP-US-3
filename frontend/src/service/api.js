@@ -9,6 +9,7 @@ export async function getEvents() {
   const response = await fetch(makeUrl("/events"));
   if (response.status === 200) {
     const events = response.json();
+    console.log(events);
     return events;
   } else {
     console.log("Cannot fetch events");
@@ -73,5 +74,15 @@ export async function updateEvent(id, editEvent) {
     return updatedEvent;
   } else {
     console.log("Cannot edit event");
+  }
+}
+
+export async function getEventsByCategoryIdOnDate(categoryId, date) {
+  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}&date=${date}`));
+  if (response.status === 200) {
+    const events = response.json();
+    return events;
+  } else {
+    console.log("Cannot fetch events");
   }
 }
