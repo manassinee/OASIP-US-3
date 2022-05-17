@@ -4,8 +4,8 @@ import int221.oasip.backendus3.entities.Event;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
@@ -17,7 +17,7 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                     "e.eventCategoryId = ?3 AND " +
                     "((e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
                     "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2))")
-    List<Event> findOverlapEventsByCategoryId(OffsetDateTime startTime, OffsetDateTime endTime, Integer categoryId);
+    List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId);
 
     @Query(nativeQuery = true,
             value = "SELECT * FROM event e WHERE e.eventCategoryId = ?1 AND DATE(e.eventStartTime) = ?2")

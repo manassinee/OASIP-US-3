@@ -5,7 +5,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 @Entity
 @Table(name = "event")
@@ -29,7 +29,7 @@ public class Event {
     private String bookingEmail;
 
     @Column(name = "eventStartTime", nullable = false)
-    private OffsetDateTime eventStartTime;
+    private Instant eventStartTime;
 
     @Column(name = "eventDuration", nullable = false)
     private Integer eventDuration;
