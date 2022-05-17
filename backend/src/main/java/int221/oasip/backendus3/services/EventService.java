@@ -47,6 +47,7 @@ public class EventService {
             EventCategory category = ec.get();
             e.setEventCategory(category);
             e.setEventDuration(category.getEventDuration());
+            e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
 
             Instant startTime = e.getEventStartTime();
             Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
@@ -85,7 +86,7 @@ public class EventService {
                 event.setEventNotes(editEvent.getEventNotes());
             }
             if (editEvent.getEventStartTime() != null) {
-                event.setEventStartTime(editEvent.getEventStartTime());
+                event.setEventStartTime(Instant.from(editEvent.getEventStartTime()));
             }
 
             return repository.saveAndFlush(event);

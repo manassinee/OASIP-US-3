@@ -63,7 +63,7 @@ export async function deleteEvent(id) {
 //UPDATE
 export async function updateEvent(id, editEvent) {
   const response = await fetch(makeUrl(`/events/${id}`), {
-    method: "PUT",
+    method: "PATCH",
     headers: {
       "content-type": "application/json"
     },
