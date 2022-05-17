@@ -5,13 +5,13 @@ import lombok.Setter;
 
 import javax.validation.constraints.Future;
 import javax.validation.constraints.Size;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
 public class EditEventRequestDTO {
     @Future(message = "Start time must be in the future")
-    private Instant eventStartTime;
+    private OffsetDateTime eventStartTime;
 
     @Size(max = 500, message = "Event notes must be less than 500 characters")
     private String eventNotes;

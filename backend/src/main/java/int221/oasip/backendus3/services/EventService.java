@@ -11,8 +11,8 @@ import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -48,8 +48,8 @@ public class EventService {
             e.setEventCategory(category);
             e.setEventDuration(category.getEventDuration());
 
-            Instant startTime = e.getEventStartTime();
-            Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
+            OffsetDateTime startTime = e.getEventStartTime();
+            OffsetDateTime endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
 
             List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, e.getEventCategory().getId());
 

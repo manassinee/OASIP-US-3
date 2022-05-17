@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.*;
-import java.time.Instant;
+import java.time.OffsetDateTime;
 
 @Getter
 @Setter
@@ -23,7 +23,7 @@ public class CreateEventRequestDTO {
 
     @NotNull(message = "Start time must not be null")
     @Future(message = "Start time must be in the future")
-    private Instant eventStartTime;
+    private OffsetDateTime eventStartTime;
 
     @Size(max = 500, message = "Event notes must be less than {max} characters")
     private String eventNotes;
