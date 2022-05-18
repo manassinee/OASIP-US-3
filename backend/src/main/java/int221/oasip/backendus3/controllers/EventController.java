@@ -22,9 +22,9 @@ public class EventController {
     @GetMapping("")
     public List<Event> getEvents(
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         if (categoryId != null && date != null) {
-           return service.getEventsByCategoryIdOnDate(categoryId, date);
+            return service.getEventsByCategoryIdOnDate(categoryId, date);
         }
 
         return service.getAll();
@@ -42,7 +42,9 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id){ service.delete(id); }
+    public void delete(@PathVariable Integer id) {
+        service.delete(id);
+    }
 
     @PatchMapping("/{id}")
     public Event update(@PathVariable Integer id, @Validated @RequestBody EditEventRequestDTO editEvent) {

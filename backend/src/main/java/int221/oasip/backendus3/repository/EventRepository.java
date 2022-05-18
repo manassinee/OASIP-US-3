@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
@@ -19,7 +21,13 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                     "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2))")
     List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId);
 
-    @Query(nativeQuery = true,
-            value = "SELECT * FROM event e WHERE e.eventCategoryId = ?1 AND DATE(e.eventStartTime) = ?2")
-    List<Event> findByCategoryIdOnDate(Integer categoryId, LocalDate date);
+    @Query("SELECT E FROM Event E WHERE E.eventCategory.id = ?1 AND E.eventStartTime >= ?2 AND E.eventStartTime < ?3")
+    List<Event> findByCategoryIdOnDate(Integer categoryId, Instant dateMidnight, Instant dateMidnightPlusOneDay);
+
+    default List<Event> findByCategoryIdOnDate(Integer categoryId, LocalDate date) {
+        Instant dateMidnight = date.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant dateMidnightPlusOneDay = dateMidnight.plus(1, ChronoUnit.DAYS);
+
+        return findByCategoryIdOnDate(categoryId, dateMidnight, dateMidnightPlusOneDay);
+    }
 }
