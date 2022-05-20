@@ -10,7 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 @RestController
@@ -22,9 +22,10 @@ public class EventController {
     @GetMapping("")
     public List<Event> getEvents(
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (categoryId != null && date != null) {
-            return service.getEventsByCategoryIdOnDate(categoryId, date);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt
+    ) {
+        if (categoryId != null && startAt != null) {
+            return service.getEventsInCategoryOnDateStartAt(categoryId, startAt.toInstant());
         }
 
         return service.getAll();

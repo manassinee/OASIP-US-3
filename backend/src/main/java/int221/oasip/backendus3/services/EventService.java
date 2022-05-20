@@ -12,7 +12,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -35,8 +34,8 @@ public class EventService {
         return event.orElse(null);
     }
 
-    public List<Event> getEventsByCategoryIdOnDate(Integer categoryId, LocalDate date) {
-        return repository.findByCategoryIdOnDate(categoryId, date);
+    public List<Event> getEventsInCategoryOnDateStartAt(Integer categoryId, Instant startAt) {
+        return repository.findByCategoryIdWithDateRangeOfOneDayStartAt(categoryId, startAt);
     }
 
     public Event save(CreateEventRequestDTO newEvent) {
