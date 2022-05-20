@@ -86,3 +86,13 @@ export async function getEventsByCategoryIdOnDate(categoryId, startAt) {
     console.log("Cannot fetch events");
   }
 }
+
+export async function getEventsByCategoryId(categoryId) {
+  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}`));
+  if (response.status === 200) {
+    const events = response.json();
+    return events;
+  } else {
+    console.log("Cannot fetch events");
+  }
+}

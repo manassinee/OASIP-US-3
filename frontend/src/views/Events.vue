@@ -1,21 +1,31 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
-import EventDetails from "../components/EventDetails.vue";
-import { deleteEvent, getEvents, updateEvent } from "../service/api";
-import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
 import Badge from "../components/Badge.vue";
 import EditEvent from "../components/EditEvent.vue";
+import EventDetails from "../components/EventDetails.vue";
+import { deleteEvent, getCategories, getEvents, getEventsByCategoryId, updateEvent } from "../service/api";
+import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
 
 
 const events = ref([]);
 const currentEvent = ref({});
+const categories = ref([]);
+
+const filter = ref({
+  categoryId: '',
+});
 
 onBeforeMount(async () => {
-  const e = await getEvents();
-  sortDescendingByDateInPlace(e, (e) => e.eventStartTime);
+  const events = await getEvents();
+  setEvents(events);
 
-  events.value = e;
+  categories.value = await getCategories();
 });
+
+function setEvents(_events) {
+  sortDescendingByDateInPlace(_events, (e) => e.eventStartTime);
+  events.value = _events;
+}
 
 
 async function cancelEvent(event) {
@@ -73,13 +83,28 @@ async function saveEvent(updates) {
     isEditing.value = false;
   }
 }
+
+async function onCategoryIdChange(e) {
+  const categoryId = e.target.value;
+
+  const events = await getEventsByCategoryId(categoryId);
+  setEvents(events);
+}
 </script>
 
 <template>
   <div class="py-8 px-12 max-w-[1440px] flex mx-auto">
 
     <div class="flex flex-col">
-      <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
+      <div class="flex justify-between">
+        <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
+        <div class="flex">
+          <select v-model="filter.categoryId" class="text-sm bg-gray-100 p-1 self-baseline" @change="onCategoryIdChange">
+            <option value="" disabled selected>Select category</option>
+            <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }}</option>
+          </select>
+        </div>
+      </div>
       <div class="flex">
         <table class="table-fixed text-left w-8/12 flex-1 break-words">
 
@@ -148,7 +173,8 @@ async function saveEvent(updates) {
         </table>
 
         <div class="p-4 bg-gray-100 relative w-4/12" v-if="currentEvent.id">
-          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @close="stopEdit" v-if="isEditing" @save="saveEvent" />
+          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @close="stopEdit" v-if="isEditing"
+            @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
         </div>
       </div>
