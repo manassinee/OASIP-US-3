@@ -2,7 +2,7 @@
 import { computed } from "@vue/reactivity";
 import { onBeforeMount, ref } from "vue";
 import { createEvent, getCategories, getEventsByCategoryIdOnDate } from "../service/api";
-import { formatDateTimeLocal } from "../utils";
+import { findOverlap, formatDateTimeLocal } from "../utils";
 
 // init inputs with default values
 const inputs = ref(makeDefaultValues());
@@ -152,7 +152,8 @@ async function validateStartTime() {
 
   if (eventCategoryId) {
     const selectedCategory = categories.value.find((category) => category.id === eventCategoryId);
-    const hasOverlap = doesEventOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
+    const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
+    const hasOverlap = overlapEvents.length > 0;
 
     if (hasOverlap) {
       errors.value.hasOverlappingEvents = true;
@@ -175,7 +176,8 @@ async function validateCategoryId() {
   console.log('fetched events (category id changed)', eventsForSelectedCategoryAndDate.value);
 
   const selectedCategory = categories.value.find((category) => category.id === eventCategoryId);
-  const hasOverlap = doesEventOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
+  const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
+  const hasOverlap = overlapEvents.length > 0;
 
   if (hasOverlap) {
     errors.value.hasOverlappingEvents = true;
@@ -183,56 +185,6 @@ async function validateCategoryId() {
     errors.value.hasOverlappingEvents = false;
   }
 }
-
-
-// fetch scheduled events when startTime or categoryId changes
-function doesEventOverlap(eventStartTime, duration, existingEvents) {
-  const startTime = new Date(eventStartTime);
-  const endTime = new Date(startTime);
-  endTime.setMinutes(startTime.getMinutes() + duration);
-  const formatter = Intl.DateTimeFormat([], { dateStyle: 'medium', timeStyle: 'short' })
-
-  console.log(`=== checking overlap for ${formatter.format(startTime)} | ${formatter.format(endTime)} ===`);
-
-  const overlapEvents = existingEvents.filter(event => {
-    const otherStartTime = new Date(event.eventStartTime);
-    const otherEndTime = new Date(event.eventStartTime);
-    otherEndTime.setMinutes(otherEndTime.getMinutes() + event.eventDuration);
-
-    // all overlap events. there are two scenarios:
-    // 1. events that started before the startTime and ended after the startTime
-    // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
-    // @Query(nativeQuery = true,
-    //     value = "SELECT * FROM Event e WHERE " +
-    //             "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
-    //             "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2)")
-
-    const isPastOverlap = otherStartTime.getTime() < startTime.getTime() && otherEndTime.getTime() > startTime.getTime();
-    const isFutureOverlap = otherStartTime.getTime() >= startTime.getTime() && otherStartTime.getTime() < endTime.getTime();
-
-    if (isPastOverlap || isFutureOverlap) {
-      if (isPastOverlap) {
-        console.log('> type: past overlap');
-      }
-      if (isFutureOverlap) {
-        console.log('> type: future overlap');
-      }
-
-      console.log(`startTime: ${formatter.format(startTime)} | endTime: ${formatter.format(endTime)}`);
-      console.log(`otherStartTime: ${formatter.format(otherStartTime)} | otherEndTime: ${formatter.format(otherEndTime)}`);
-      return true;
-    }
-
-    return false;
-  });
-
-  if (overlapEvents.length === 0) {
-    console.log(`no overlap at ${formatter.format(startTime)}`);
-  }
-
-  return overlapEvents.length > 0;
-}
-
 </script>
  
 <template>
@@ -277,7 +229,8 @@ function doesEventOverlap(eventStartTime, duration, existingEvents) {
 
       <div class="flex flex-col gap-2">
         <label for="category" class="required text-sm font-medium text-gray-700">Category</label>
-        <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2 rounded" @change="validateCategoryId">
+        <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2 rounded" @change="validateCategoryId"
+          id="category">
           <option disabled selected value="">Select event category</option>
           <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} ({{
               category.eventDuration

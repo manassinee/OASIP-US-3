@@ -2,7 +2,7 @@
 import { computed } from '@vue/reactivity';
 import { ref } from 'vue';
 import { getEventsByCategoryIdOnDate } from "../service/api";
-import { formatDateTimeLocal } from '../utils';
+import { findOverlap, formatDateTimeLocal } from '../utils';
 import Badge from './Badge.vue';
 
 const props = defineProps({
@@ -73,6 +73,7 @@ const eventsForSelectedCategoryAndDate = ref([]);
 async function validateStartTime() {
   const eventStartTime = inputs.value.eventStartTime;
   const eventCategoryId = props.currentEvent.eventCategory.id;
+  const eventId = props.currentEvent.id;
 
   if (!eventStartTime) {
     return;
@@ -105,63 +106,13 @@ async function validateStartTime() {
 
   if (eventCategoryId) {
     const selectedCategory = props.currentEvent.eventCategory;
-    const hasOverlap = doesEventOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
+    const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value, eventId);
+    const hasOverlap = overlapEvents.length > 0;
 
     if (hasOverlap) {
       errors.value.hasOverlappingEvents = true;
     }
   }
-}
-
-function doesEventOverlap(eventStartTime, duration, existingEvents) {
-  const startTime = new Date(eventStartTime);
-  const endTime = new Date(startTime);
-  endTime.setMinutes(startTime.getMinutes() + duration);
-  const formatter = Intl.DateTimeFormat([], { dateStyle: 'medium', timeStyle: 'short' })
-
-  console.log(`=== checking overlap for ${formatter.format(startTime)} | ${formatter.format(endTime)} ===`);
-
-  const overlapEvents = existingEvents.filter(event => {
-    const otherStartTime = new Date(event.eventStartTime);
-    const otherEndTime = new Date(event.eventStartTime);
-    otherEndTime.setMinutes(otherEndTime.getMinutes() + event.eventDuration);
-
-    if (event.id === props.currentEvent.id) {
-      return false;
-    }
-
-    // all overlap events. there are two scenarios:
-    // 1. events that started before the startTime and ended after the startTime
-    // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
-    // @Query(nativeQuery = true,
-    //     value = "SELECT * FROM Event e WHERE " +
-    //             "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
-    //             "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2)")
-
-    const isPastOverlap = otherStartTime.getTime() < startTime.getTime() && otherEndTime.getTime() > startTime.getTime();
-    const isFutureOverlap = otherStartTime.getTime() >= startTime.getTime() && otherStartTime.getTime() < endTime.getTime();
-
-    if (isPastOverlap || isFutureOverlap) {
-      if (isPastOverlap) {
-        console.log('> type: past overlap');
-      }
-      if (isFutureOverlap) {
-        console.log('> type: future overlap');
-      }
-
-      console.log(`startTime: ${formatter.format(startTime)} | endTime: ${formatter.format(endTime)}`);
-      console.log(`otherStartTime: ${formatter.format(otherStartTime)} | otherEndTime: ${formatter.format(otherEndTime)}`);
-      return true;
-    }
-
-    return false;
-  });
-
-  if (overlapEvents.length === 0) {
-    console.log(`no overlap at ${formatter.format(startTime)}`);
-  }
-
-  return overlapEvents.length > 0;
 }
 </script>
  
