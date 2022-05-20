@@ -98,7 +98,7 @@ export async function getEventsByCategoryId(categoryId) {
 }
 
 export async function getEventsByFilter(filter) {
-  const { categoryId, type } = filter;
+  const { categoryId, type, startAt } = filter;
 
   let uri = "/events?";
   const filters = [];
@@ -109,6 +109,10 @@ export async function getEventsByFilter(filter) {
 
   if (type) {
     filters.push(`type=${type}`);
+  }
+
+  if (startAt) {
+    filters.push(`startAt=${startAt}`);
   }
 
   if (filters.length > 0) {

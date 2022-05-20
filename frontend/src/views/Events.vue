@@ -23,7 +23,8 @@ const categoryTypes = {
 
 const filter = ref({
   categoryId: categoryTypes.ALL,
-  type: eventTypes.ALL
+  type: eventTypes.ALL,
+  date: ''
 });
 
 onBeforeMount(async () => {
@@ -96,11 +97,22 @@ async function saveEvent(updates) {
 }
 
 async function filterEvents() {
-  const events = await getEventsByFilter({
-    categoryId: filter.value.categoryId,
-    type: filter.value.type
-  });
+  const categoryId = filter.value.categoryId;
+  const type = filter.value.type;
+  const date = filter.value.date;
+  const _filter = {
+    categoryId,
+    type,
+  };
 
+  // add startAt only if all type is selected
+  if (date && type === eventTypes.ALL) {
+    const localDate = `${filter.value.date}T00:00:00`;
+    const startAt = new Date(localDate);
+    _filter.startAt = startAt.toISOString();
+  }
+
+  const events = await getEventsByFilter(_filter);
   setEvents(events);
 }
 </script>
@@ -111,7 +123,8 @@ async function filterEvents() {
     <div class="flex flex-col">
       <div class="flex justify-between mb-4">
         <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
-        <div class="flex gap-2">
+        <div class="flex gap-6 flex-wrap">
+
           <div class="flex flex-col gap-1">
             <label class="text-xs text-gray-600">Category</label>
             <select v-model="filter.categoryId" class="text-sm bg-gray-100 p-1 self-baseline" @change="filterEvents">
@@ -120,14 +133,23 @@ async function filterEvents() {
             </select>
           </div>
 
-          <div class="flex flex-col gap-1">
-            <label class="text-xs text-gray-600">Type</label>
-            <select v-model="filter.type" class="text-sm bg-gray-100 p-1" @change="filterEvents">
-              <option selected :value="eventTypes.ALL">All</option>
-              <option :value="eventTypes.UPCOMING">Upcoming</option>
-              <option :value="eventTypes.PAST">Past</option>
-            </select>
+          <div class="flex gap-2">
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-gray-600">Type</label>
+              <select v-model="filter.type" class="text-sm bg-gray-100 p-1" @change="filterEvents">
+                <option :value="eventTypes.ALL">All</option>
+                <option :value="eventTypes.UPCOMING">Upcoming</option>
+                <option :value="eventTypes.PAST">Past</option>
+              </select>
+            </div>
+
+            <div class="flex flex-col gap-1">
+              <label class="text-xs text-gray-600">Date</label>
+              <input v-model="filter.date" class="text-sm bg-gray-100 p-1 disabled:bg-gray-200 disabled:text-gray-400"
+                type="date" @change="filterEvents" :disabled="filter.type !== eventTypes.ALL">
+            </div>
           </div>
+
         </div>
       </div>
       <div class="flex">
