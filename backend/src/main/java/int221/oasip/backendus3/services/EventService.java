@@ -33,8 +33,12 @@ public class EventService {
         return event.orElse(null);
     }
 
-    public List<Event> getEventsInCategoryOnDateStartAt(Integer categoryId, Instant startAt) {
-        return repository.findByCategoryIdWithDateRangeOfOneDayStartAt(categoryId, startAt);
+    public List<Event> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
+        return repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
+    }
+
+    public List<Event> getEventsOnDateStartAt(Instant startAt) {
+        return repository.findByDateRangeOfOneDayStartAt(startAt);
     }
 
     public Event save(CreateEventRequestDTO newEvent) {

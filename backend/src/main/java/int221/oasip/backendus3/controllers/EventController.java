@@ -25,8 +25,12 @@ public class EventController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam(required = false) String type
     ) {
-        if (categoryId != null && startAt != null) {
-            return service.getEventsInCategoryOnDateStartAt(categoryId, startAt.toInstant());
+        if (startAt != null) {
+            if (categoryId != null) {
+                return service.getEventsOnDateStartAt(startAt.toInstant(), categoryId);
+            } else {
+                return service.getEventsOnDateStartAt(startAt.toInstant());
+            }
         }
 
         if ("upcoming".equalsIgnoreCase(type)) {
