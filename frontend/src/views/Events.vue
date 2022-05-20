@@ -3,7 +3,7 @@ import { onBeforeMount, ref } from "vue";
 import Badge from "../components/Badge.vue";
 import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
-import { deleteEvent, getCategories, getEvents, getEventsByCategoryId, updateEvent } from "../service/api";
+import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
 import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
 
 
@@ -11,8 +11,19 @@ const events = ref([]);
 const currentEvent = ref({});
 const categories = ref([]);
 
+const eventTypes = {
+  UPCOMING: "upcoming",
+  PAST: "past",
+  ALL: null
+};
+
+const categoryTypes = {
+  ALL: null,
+}
+
 const filter = ref({
-  categoryId: '',
+  categoryId: categoryTypes.ALL,
+  type: eventTypes.ALL
 });
 
 onBeforeMount(async () => {
@@ -84,10 +95,12 @@ async function saveEvent(updates) {
   }
 }
 
-async function onCategoryIdChange(e) {
-  const categoryId = e.target.value;
+async function filterEvents() {
+  const events = await getEventsByFilter({
+    categoryId: filter.value.categoryId,
+    type: filter.value.type
+  });
 
-  const events = await getEventsByCategoryId(categoryId);
   setEvents(events);
 }
 </script>
@@ -96,13 +109,25 @@ async function onCategoryIdChange(e) {
   <div class="py-8 px-12 max-w-[1440px] flex mx-auto">
 
     <div class="flex flex-col">
-      <div class="flex justify-between">
+      <div class="flex justify-between mb-4">
         <div class="mb-4 font-semibold">All Events: {{ events.length }} events</div>
-        <div class="flex">
-          <select v-model="filter.categoryId" class="text-sm bg-gray-100 p-1 self-baseline" @change="onCategoryIdChange">
-            <option value="" disabled selected>Select category</option>
-            <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }}</option>
-          </select>
+        <div class="flex gap-2">
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-600">Category</label>
+            <select v-model="filter.categoryId" class="text-sm bg-gray-100 p-1 self-baseline" @change="filterEvents">
+              <option :value="categoryTypes.ALL">All</option>
+              <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }}</option>
+            </select>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <label class="text-xs text-gray-600">Type</label>
+            <select v-model="filter.type" class="text-sm bg-gray-100 p-1" @change="filterEvents">
+              <option selected :value="eventTypes.ALL">All</option>
+              <option :value="eventTypes.UPCOMING">Upcoming</option>
+              <option :value="eventTypes.PAST">Past</option>
+            </select>
+          </div>
         </div>
       </div>
       <div class="flex">
@@ -166,7 +191,11 @@ async function onCategoryIdChange(e) {
 
             </tr>
             <tr v-else>
-              <td colspan="4" class="p-6 text-center">No Scheduled Event</td>
+              <td colspan="4" class="p-6 text-center">
+                <span v-if="filter.type === eventTypes.UPCOMING">No On-Going or Upcoming Events</span>
+                <span v-else-if="filter.type === eventTypes.PAST">No Past Events</span>
+                <span v-else>No Scheduled Event</span>
+              </td>
             </tr>
           </tbody>
 
