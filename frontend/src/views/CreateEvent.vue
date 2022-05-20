@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from "@vue/reactivity";
 import { onBeforeMount, ref } from "vue";
 import { createEvent, getCategories, getEventsByCategoryIdOnDate } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
@@ -26,13 +27,17 @@ onBeforeMount(async () => {
 const minDateTImeLocal = formatDateTimeLocal(new Date());
 const eventsForSelectedCategoryAndDate = ref([]);
 
+const canSubmit = computed(() => {
+  const noErrors = Object.values(errors.value).every((error) => error === false || error.length === 0);
+  const inputsWithoutNotes = { ...inputs.value };
+  delete inputsWithoutNotes.eventNotes;
+
+  const noEmptyFields = Object.values(inputsWithoutNotes).every((value) => value !== '');
+
+  return noErrors && noEmptyFields;
+});
+
 async function handleSubmit() {
-  const canSubmit = Object.values(errors.value).every((error) => error.length === 0);
-
-  if (!canSubmit) {
-    return;
-  }
-
   const event = {
     ...inputs.value,
 
@@ -231,52 +236,77 @@ function doesEventOverlap(eventStartTime, duration, existingEvents) {
 </script>
  
 <template>
-  <div>
-    <form @submit.prevent="handleSubmit" class="flex flex-col gap-4">
-      <label for="name">Booking Name </label>
-      <input id="name" type="text" v-model="inputs.bookingName" required class="bg-gray-100 p-2"
-        @input="validateBookingName">
-      <div v-if="errors.bookingName.length > 0"
-        class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
-        <span v-for="error in errors.bookingName">{{ error }}</span>
+  <div class="max-w-md mx-auto mt-8">
+    <form @submit.prevent="handleSubmit"
+      class="flex flex-col gap-4 bg-white py-10 px-8 border border-gray-100 rounded-xl shadow-xl shadow-black/5">
+
+      <div class="flex flex-col text-center mb-4 text-gray-700">
+        <h1 class="font-medium text-2xl">Create Event</h1>
       </div>
 
-      <label for="email">Booking Email </label>
-      <input id="email" type="email" v-model="inputs.bookingEmail" required class="bg-gray-100 p-2"
-        @input="validateBookingEmail">
-      <div v-if="errors.bookingEmail.length > 0"
-        class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
-        <span v-for="error in errors.bookingEmail">{{ error }}</span>
+      <div class="flex flex-col gap-2">
+        <label for="name" class="required text-sm font-medium text-gray-700">Booking Name</label>
+        <input id="name" type="text" v-model="inputs.bookingName" required class="bg-gray-100 p-2 rounded"
+          @input="validateBookingName" placeholder="What's your booking name?">
+        <div v-if="errors.bookingName.length > 0"
+          class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+          <span v-for="error in errors.bookingName">{{ error }}</span>
+        </div>
       </div>
 
-      <label for="startTime">Event Start Time </label>
-      <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="inputs.eventStartTime" required
-        class="bg-gray-100 p-2" @input="validateStartTime">
-      <div v-if="errors.eventStartTime.length > 0 || errors.hasOverlappingEvents"
-        class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
-        <span v-for="error in errors.eventStartTime">{{ error }}</span>
-        <span v-if="errors.hasOverlappingEvents">Start time overlaps with other event(s)</span>
+      <div class="flex flex-col gap-2">
+        <label for="email" class="required text-sm font-medium text-gray-700">Booking Email</label>
+        <input id="email" type="email" v-model="inputs.bookingEmail" required class="bg-gray-100 p-2 rounded"
+          @input="validateBookingEmail" placeholder="What's your email?">
+        <div v-if="errors.bookingEmail.length > 0"
+          class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+          <span v-for="error in errors.bookingEmail">{{ error }}</span>
+        </div>
       </div>
 
-
-      <label for="category">Event Category </label>
-      <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2" @change="validateCategoryId">
-        <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} - ({{
-            category.eventDuration
-        }} minutes)</option>
-      </select>
-
-      <label for="notes">Event Notes (optional)</label>
-      <textarea id="notes" v-model="inputs.eventNotes" class="bg-gray-100 p-2" @input="validateEventNotes"></textarea>
-      <div v-if="errors.eventNotes.length > 0"
-        class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
-        <span v-for="error in errors.eventNotes">{{ error }}</span>
+      <div class="flex flex-col gap-2">
+        <label for="startTime" class="required text-sm font-medium text-gray-700">Start Time</label>
+        <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="inputs.eventStartTime" required
+          class="bg-gray-100 p-2 rounded" @input="validateStartTime">
+        <div v-if="errors.eventStartTime.length > 0 || errors.hasOverlappingEvents"
+          class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+          <span v-for="error in errors.eventStartTime">{{ error }}</span>
+          <span v-if="errors.hasOverlappingEvents">Start time overlaps with other event(s)</span>
+        </div>
       </div>
 
-      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">submit</button>
+      <div class="flex flex-col gap-2">
+        <label for="category" class="required text-sm font-medium text-gray-700">Category</label>
+        <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2 rounded" @change="validateCategoryId">
+          <option disabled selected value="">Select event category</option>
+          <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} ({{
+              category.eventDuration
+          }} min.)</option>
+        </select>
+      </div>
+
+      <div class="flex flex-col gap-2">
+        <label for="notes" class="text-sm font-medium text-gray-700">Notes <span
+            class="text-gray-400 font-normal">(optional)</span></label>
+        <textarea id="notes" v-model="inputs.eventNotes" class="bg-gray-100 p-2 rounded" @input="validateEventNotes"
+          placeholder="What's your event about?"></textarea>
+        <div v-if="errors.eventNotes.length > 0"
+          class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
+          <span v-for="error in errors.eventNotes">{{ error }}</span>
+        </div>
+      </div>
+
+      <button type="submit"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded disabled:opacity-60 disabled:cursor-not-allowed mt-2"
+        :disabled="!canSubmit">Create
+        Event</button>
     </form>
   </div>
 </template>
  
 <style scoped>
+.required::after {
+  content: '*';
+  @apply text-red-500 pl-1
+}
 </style>
