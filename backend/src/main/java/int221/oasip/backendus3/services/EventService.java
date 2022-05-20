@@ -24,8 +24,7 @@ public class EventService {
     private EventCategoryRepository categoryRepository;
 
     public List<Event> getAll() {
-        List<Event> events = repository.findAll();
-        return events;
+        return repository.findAll();
     }
 
     public Event getEvent(Integer id){
@@ -92,5 +91,9 @@ public class EventService {
         }
 
         return null;
+    }
+
+    public List<Event> getEventsInCategory(Integer categoryId) {
+        return repository.findByEventCategory_Id(categoryId);
     }
 }

@@ -26,4 +26,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
         Instant endAt = startAt.plus(1, ChronoUnit.DAYS);
         return findByCategoryIdAndDateRange(categoryId, startAt, endAt);
     }
+
+    List<Event> findByEventCategory_Id(Integer categoryId);
 }

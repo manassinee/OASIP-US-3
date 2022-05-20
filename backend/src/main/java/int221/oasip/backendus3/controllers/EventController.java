@@ -28,6 +28,10 @@ public class EventController {
             return service.getEventsInCategoryOnDateStartAt(categoryId, startAt.toInstant());
         }
 
+        if (categoryId != null) {
+            return service.getEventsInCategory(categoryId);
+        }
+
         return service.getAll();
     }
 
