@@ -84,16 +84,20 @@ function formatDateTime(date) {
 }
 
 async function saveEvent(updates) {
-  // console.log(updates);
   const selectedEventId = currentEvent.value.id;
-  const updatedEvent = await updateEvent(selectedEventId, updates);
-  if (updatedEvent) {
-    const event = events.value.find((e) => e.id === selectedEventId);
-    event.eventStartTime = updatedEvent.eventStartTime;
-    event.eventNotes = updatedEvent.eventNotes;
 
-    isEditing.value = false;
+  if (new Date(updates.eventStartTime).getTime() !== new Date(currentEvent.value.eventStartTime).getTime() ||
+    updates.eventNotes !== currentEvent.value.eventNotes) {
+    const updatedEvent = await updateEvent(selectedEventId, updates);
+    if (updatedEvent) {
+      const event = events.value.find((e) => e.id === selectedEventId);
+      event.eventStartTime = updatedEvent.eventStartTime;
+      event.eventNotes = updatedEvent.eventNotes;
+
+    }
   }
+
+  isEditing.value = false;
 }
 
 async function filterEvents() {
@@ -224,7 +228,7 @@ async function filterEvents() {
         </table>
 
         <div class="p-4 bg-gray-100 relative w-4/12" v-if="currentEvent.id">
-          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @close="stopEdit" v-if="isEditing"
+          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="stopEdit" v-if="isEditing"
             @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
         </div>
