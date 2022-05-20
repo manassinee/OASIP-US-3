@@ -77,8 +77,8 @@ export async function updateEvent(id, editEvent) {
   }
 }
 
-export async function getEventsByCategoryIdOnDate(categoryId, date) {
-  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}&date=${date}`));
+export async function getEventsByCategoryIdOnDate(categoryId, startAt) {
+  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}&startAt=${startAt}`));
   if (response.status === 200) {
     const events = response.json();
     return events;
