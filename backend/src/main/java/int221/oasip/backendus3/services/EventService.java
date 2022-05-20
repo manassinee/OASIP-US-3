@@ -96,4 +96,22 @@ public class EventService {
     public List<Event> getEventsInCategory(Integer categoryId) {
         return repository.findByEventCategory_Id(categoryId);
     }
+
+    public List<Event> getUpcomingAndOngoingEvents(Integer categoryId) {
+        Instant now = Instant.now();
+        return repository.findUpcomingAndOngoingEvents(now, categoryId);
+    }
+
+    public List<Event> getUpcomingAndOngoingEvents() {
+        return getUpcomingAndOngoingEvents(null);
+    }
+
+    public List<Event> getPastEvents(Integer categoryId) {
+        Instant now = Instant.now();
+        return repository.findPastEvents(now, categoryId);
+    }
+
+    public List<Event> getPastEvents() {
+        return getPastEvents(null);
+    }
 }

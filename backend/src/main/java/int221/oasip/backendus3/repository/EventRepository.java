@@ -28,4 +28,22 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     }
 
     List<Event> findByEventCategory_Id(Integer categoryId);
+
+    // get upcoming and ongoing events, with these constraints:
+    // 1. categoryId is optional.
+    // 2. events that start after now (upcoming)
+    // 3. event that start before now but end after now (ongoing)
+    @Query(nativeQuery = true,
+    value = "SELECT * FROM event e WHERE " +
+            "(?2 IS NULL OR e.eventCategoryId = ?2) AND " + // optional categoryId
+            "((e.eventStartTime > ?1) OR " + // upcoming
+            "(e.eventStartTime <= ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1))") // ongoing
+    List<Event> findUpcomingAndOngoingEvents(Instant startAt, Integer categoryId);
+
+    // get past events (start before now and end at or before now)
+    @Query(nativeQuery = true,
+            value = "SELECT * FROM event e WHERE " +
+                    "(?2 IS NULL OR e.eventCategoryId = ?2) AND " + // optional categoryId
+                    "(e.eventStartTime <= ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) <= ?1)")
+    List<Event> findPastEvents(Instant now, Integer categoryId);
 }

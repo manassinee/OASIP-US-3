@@ -22,10 +22,27 @@ public class EventController {
     @GetMapping("")
     public List<Event> getEvents(
             @RequestParam(required = false) Integer categoryId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
+            @RequestParam(required = false) String type
     ) {
         if (categoryId != null && startAt != null) {
             return service.getEventsInCategoryOnDateStartAt(categoryId, startAt.toInstant());
+        }
+
+        if ("upcoming".equalsIgnoreCase(type)) {
+            if (categoryId != null) {
+                return service.getUpcomingAndOngoingEvents(categoryId);
+            } else {
+                return service.getUpcomingAndOngoingEvents();
+            }
+        }
+
+        if ("past".equalsIgnoreCase(type)) {
+            if (categoryId != null) {
+                return service.getPastEvents(categoryId);
+            } else {
+                return service.getPastEvents();
+            }
         }
 
         if (categoryId != null) {
