@@ -5,14 +5,12 @@ export function sortDescendingByDateInPlace(arr, keyExtractor) {
 }
 
 export function formatDateTimeLocal(date) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-
-  const formatted = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}T${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-  return formatted;
+  const copiedDate = new Date(date);
+  const offset = copiedDate.getTimezoneOffset();
+  // add the offset before converting to UTC, result in local time
+  // offset is -420 min. for UTC+7, thus --420 = +420
+  copiedDate.setMinutes(copiedDate.getMinutes() - offset, 0, 0);
+  return copiedDate.toISOString().slice(0, -1);
 }
 
 export function formatDateAndFromToTime(date, durationMinute) {
