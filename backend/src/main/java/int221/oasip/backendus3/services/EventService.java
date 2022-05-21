@@ -1,5 +1,6 @@
 package int221.oasip.backendus3.services;
 
+import int221.oasip.backendus3.controllers.BadRequestException;
 import int221.oasip.backendus3.controllers.FieldNotValidException;
 import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.dtos.EditEventRequestDTO;
@@ -83,6 +84,10 @@ public class EventService {
         // set event fields
         if (e.isPresent()) {
             Event event = e.get();
+
+            if (editEvent.getEventStartTime() == null && editEvent.getEventNotes() == null) {
+                throw new BadRequestException("At least one of eventStartTime or eventNotes must be provided");
+            }
 
             if (editEvent.getEventNotes() != null) {
                 event.setEventNotes(editEvent.getEventNotes());
