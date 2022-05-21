@@ -50,6 +50,6 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query(nativeQuery = true,
             value = "SELECT * FROM event e WHERE " +
                     "(?2 IS NULL OR e.eventCategoryId = ?2) AND " + // optional categoryId
-                    "(e.eventStartTime <= ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) <= ?1)")
+                    "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) <= ?1)")
     List<Event> findPastEvents(Instant now, Integer categoryId);
 }
