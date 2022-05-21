@@ -1,8 +1,6 @@
 <script setup>
-import { computed } from '@vue/reactivity';
-import { ref } from 'vue';
-import { getEventsByCategoryIdOnDate } from "../service/api";
-import { findOverlap, formatDateTimeLocal } from '../utils';
+import { formatDateTimeLocal } from '../utils';
+import { useValidator } from '../utils/useValidator';
 import Badge from './Badge.vue';
 
 const props = defineProps({
@@ -12,107 +10,40 @@ const props = defineProps({
   }
 });
 
-const inputs = ref({
-  eventStartTime: formatDateTimeLocal(new Date(props.currentEvent.eventStartTime)),
-  eventNotes: props.currentEvent.eventNotes,
-});
-
-const minDateTImeLocal = formatDateTimeLocal(new Date());
-
 const emits = defineEmits([
   'save',
   'cancel'
 ]);
 
-function makeDefaultValues() {
-  return {
-    eventStartTime: '',
-    eventNotes: ''
-  };
-}
+const minDateTImeLocal = formatDateTimeLocal(new Date());
 
-const errors = ref({
-  eventStartTime: [],
-  eventNotes: [],
-  hasOverlappingEvents: false
-});
+const {
+  errors,
+  inputs,
+  validateEventNotes,
+  validateStartTime,
+  setEventDuration,
+  canSubmit,
+  setEventId,
+  setCategoryId
+} = useValidator();
 
-const canSubmit = computed(() => {
-  const noErrors = Object.values(errors.value).every((error) => error === false || error.length === 0);
-  const inputsWithoutNotes = { ...inputs.value };
-  delete inputsWithoutNotes.eventNotes;
 
-  const noEmptyFields = Object.values(inputsWithoutNotes).every((value) => value !== '');
+// only use three fields for now (including eventCategoryId)
+inputs.value = {
+  eventStartTime: formatDateTimeLocal(new Date(props.currentEvent.eventStartTime)),
+  eventNotes: props.currentEvent.eventNotes
+};
 
-  return noErrors && noEmptyFields;
-});
+setEventId(props.currentEvent.id);
+setEventDuration(props.currentEvent.eventDuration);
+setCategoryId(props.currentEvent.eventCategory.id);
 
 function handleSaveClick() {
-  if (!canSubmit.value) {
-    return;
-  }
-
   const eventStartTime = new Date(inputs.value.eventStartTime).toISOString();
   const eventNotes = inputs.value.eventNotes;
 
   emits('save', { eventStartTime, eventNotes });
-}
-
-function validateEventNotes(e) {
-  const eventNotes = e.target.value;
-  errors.value.eventNotes = [];
-
-  if (eventNotes.length > 500) {
-    errors.value.eventNotes.push("Booking note must be less than 500 characters");
-  }
-}
-
-const previousDate = ref(null);
-const eventsForSelectedCategoryAndDate = ref([]);
-
-async function validateStartTime() {
-  const eventStartTime = inputs.value.eventStartTime;
-  const eventCategoryId = props.currentEvent.eventCategory.id;
-  const eventId = props.currentEvent.id;
-
-  if (!eventStartTime) {
-    return;
-  }
-
-  const now = new Date();
-  const startTime = new Date(eventStartTime);
-
-  errors.value.eventStartTime = [];
-  errors.value.hasOverlappingEvents = false;
-
-  if (startTime.getTime() <= now.getTime()) {
-    errors.value.eventStartTime.push("Start time must be in the future")
-  }
-
-  const date = eventStartTime.split('T')[0];
-  if (date !== previousDate.value) {
-    console.log('date changed', date);
-
-    if (eventCategoryId) {
-      const dateMidnight = new Date(eventStartTime);
-      dateMidnight.setHours(0, 0, 0, 0);
-
-      eventsForSelectedCategoryAndDate.value = await getEventsByCategoryIdOnDate(eventCategoryId, dateMidnight.toISOString());
-      console.log('fetched events (start time changed)', eventsForSelectedCategoryAndDate.value);
-    }
-  }
-
-  previousDate.value = date;
-
-  if (eventCategoryId) {
-    const selectedCategory = props.currentEvent.eventCategory;
-    const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value, eventId);
-    const hasOverlap = overlapEvents.length > 0;
-
-    if (hasOverlap) {
-      errors.value.hasOverlappingEvents = true;
-    }
-  }
 }
 </script>
  

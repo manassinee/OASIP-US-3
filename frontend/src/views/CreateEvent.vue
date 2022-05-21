@@ -1,41 +1,30 @@
 <script setup>
-import { computed } from "@vue/reactivity";
 import { onBeforeMount, ref } from "vue";
-import { createEvent, getCategories, getEventsByCategoryIdOnDate } from "../service/api";
-import { findOverlap, formatDateTimeLocal } from "../utils";
+import { createEvent, getCategories } from "../service/api";
+import { formatDateTimeLocal } from "../utils";
+import { useValidator } from "../utils/useValidator";
 
-// init inputs with default values
-const inputs = ref(makeDefaultValues());
 const categories = ref([]);
+const {
+  errors,
+  inputs,
+  validateBookingName,
+  validateBookingEmail,
+  validateEventNotes,
+  validateStartTime,
+  validateCategoryId,
+  setEventDuration,
+  resetInputs,
+  canSubmit
+} = useValidator();
 
-function makeDefaultValues() {
-  return {
-    bookingName: '',
-    bookingEmail: '',
-    eventStartTime: '',
-    eventCategoryId: '',
-    eventNotes: ''
-  };
-}
 
 onBeforeMount(async () => {
   categories.value = await getCategories();
 });
 
-
 // format: 2022-02-02T02:02
 const minDateTImeLocal = formatDateTimeLocal(new Date());
-const eventsForSelectedCategoryAndDate = ref([]);
-
-const canSubmit = computed(() => {
-  const noErrors = Object.values(errors.value).every((error) => error === false || error.length === 0);
-  const inputsWithoutNotes = { ...inputs.value };
-  delete inputsWithoutNotes.eventNotes;
-
-  const noEmptyFields = Object.values(inputsWithoutNotes).every((value) => value !== '');
-
-  return noErrors && noEmptyFields;
-});
 
 async function handleSubmit() {
   const event = {
@@ -49,8 +38,7 @@ async function handleSubmit() {
     const createdEvent = await createEvent(event);
 
     if (createdEvent) {
-      // clear inputs
-      inputs.value = makeDefaultValues();
+      resetInputs();
       alert('Successfully created the event');
     } else {
       alert('Sorry, something went wrong');
@@ -64,126 +52,11 @@ async function handleSubmit() {
   }
 }
 
-
-const errors = ref({
-  bookingName: [],
-  bookingEmail: [],
-  eventStartTime: [],
-  eventNotes: [],
-  hasOverlappingEvents: false
-});
-
-function validateBookingName(e) {
-  const bookingName = e.target.value;
-  errors.value.bookingName = [];
-
-  if (bookingName.length > 100) {
-    errors.value.bookingName.push("Booking name must be less than 100 characters");
-  }
-
-  if (bookingName.trim().length === 0) {
-    errors.value.bookingName.push("Booking name must not be blank");
-  }
-}
-
-function validateBookingEmail(e) {
-  const bookingEmail = e.target.value;
-  errors.value.bookingEmail = [];
-
-  if (bookingEmail.length > 50) {
-    errors.value.bookingEmail.push("Booking email must be less than 50 characters");
-  }
-
-  if (bookingEmail.trim().length === 0) {
-    errors.value.bookingEmail.push("Booking email must not be blank");
-  }
-
-  // RFC2822 https://regexr.com/2rhq7
-  const emailRegex = /^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
-  if (!emailRegex.test(bookingEmail)) {
-    errors.value.bookingEmail.push("Booking email is invalid");
-  }
-}
-
-function validateEventNotes(e) {
-  const eventNotes = e.target.value;
-  errors.value.eventNotes = [];
-
-  if (eventNotes.length > 500) {
-    errors.value.eventNotes.push("Booking note must be less than 500 characters");
-  }
-}
-
-
-const previousDate = ref(null);
-
-async function validateStartTime() {
-  const eventStartTime = inputs.value.eventStartTime;
+function handleCategoryIdChange() {
   const eventCategoryId = inputs.value.eventCategoryId;
-
-  if (!eventStartTime) {
-    return;
-  }
-
-  const now = new Date();
-  const startTime = new Date(eventStartTime);
-
-  errors.value.eventStartTime = [];
-  errors.value.hasOverlappingEvents = false;
-
-  if (startTime.getTime() <= now.getTime()) {
-    errors.value.eventStartTime.push("Start time must be in the future")
-  }
-
-  const date = eventStartTime.split('T')[0];
-  if (date !== previousDate.value) {
-    console.log('date changed', date);
-
-    if (eventCategoryId) {
-      const dateMidnight = new Date(eventStartTime);
-      dateMidnight.setHours(0, 0, 0, 0);
-
-      eventsForSelectedCategoryAndDate.value = await getEventsByCategoryIdOnDate(eventCategoryId, dateMidnight.toISOString());
-      console.log('fetched events (start time changed)', eventsForSelectedCategoryAndDate.value);
-    }
-  }
-
-  previousDate.value = date;
-
-  if (eventCategoryId) {
-    const selectedCategory = categories.value.find((category) => category.id === eventCategoryId);
-    const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
-    const hasOverlap = overlapEvents.length > 0;
-
-    if (hasOverlap) {
-      errors.value.hasOverlappingEvents = true;
-    }
-  }
-}
-
-async function validateCategoryId() {
-  const eventStartTime = inputs.value.eventStartTime;
-  const eventCategoryId = inputs.value.eventCategoryId;
-
-  if (!eventStartTime || !eventCategoryId) {
-    return;
-  }
-
-  const dateMidnight = new Date(eventStartTime);
-  dateMidnight.setHours(0, 0, 0, 0);
-
-  eventsForSelectedCategoryAndDate.value = await getEventsByCategoryIdOnDate(eventCategoryId, dateMidnight.toISOString());
-  console.log('fetched events (category id changed)', eventsForSelectedCategoryAndDate.value);
-
-  const selectedCategory = categories.value.find((category) => category.id === eventCategoryId);
-  const overlapEvents = findOverlap(eventStartTime, selectedCategory.eventDuration, eventsForSelectedCategoryAndDate.value);
-  const hasOverlap = overlapEvents.length > 0;
-
-  if (hasOverlap) {
-    errors.value.hasOverlappingEvents = true;
-  } else {
-    errors.value.hasOverlappingEvents = false;
-  }
+  const category = categories.value.find((category) => category.id === eventCategoryId);
+  setEventDuration(category.eventDuration);
+  validateCategoryId();
 }
 </script>
  
@@ -229,8 +102,8 @@ async function validateCategoryId() {
 
       <div class="flex flex-col gap-2">
         <label for="category" class="required text-sm font-medium text-gray-700">Category</label>
-        <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2 rounded" @change="validateCategoryId"
-          id="category">
+        <select v-model="inputs.eventCategoryId" required class="bg-gray-100 p-2 rounded"
+          @change="handleCategoryIdChange" id="category">
           <option disabled selected value="">Select event category</option>
           <option v-for="category in categories" :value="category.id">{{ category.eventCategoryName }} ({{
               category.eventDuration
