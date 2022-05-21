@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import int221.oasip.backendus3.controllers.BadRequestException;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.error.ErrorAttributeOptions;
 import org.springframework.boot.web.servlet.error.DefaultErrorAttributes;
@@ -15,7 +16,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
-import int221.oasip.backendus3.controllers.OverlapEventException;
+import int221.oasip.backendus3.controllers.FieldNotValidException;
 
 @Configuration
 public class ApplicationConfig {
@@ -48,8 +49,8 @@ public class ApplicationConfig {
                     }
                 }
 
-                if (error instanceof OverlapEventException) {
-                    OverlapEventException exception = (OverlapEventException) error;
+                if (error instanceof FieldNotValidException) {
+                    FieldNotValidException exception = (FieldNotValidException) error;
                     errorMaps.put(exception.getField(), List.of(exception.getMessage()));
                     errorAttributes.put("message", "Validation failed");
                     errorAttributes.put("errors", errorMaps);

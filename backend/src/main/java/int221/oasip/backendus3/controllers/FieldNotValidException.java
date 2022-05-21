@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.BAD_REQUEST)
 @Getter
-public class OverlapEventException extends RuntimeException {
+public class FieldNotValidException extends RuntimeException {
     private final String field;
 
-    public OverlapEventException(String field, String message) {
+    public FieldNotValidException(String field, String message) {
         super(message);
         this.field = field;
     }

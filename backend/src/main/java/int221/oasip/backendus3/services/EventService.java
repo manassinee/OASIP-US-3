@@ -1,6 +1,6 @@
 package int221.oasip.backendus3.services;
 
-import int221.oasip.backendus3.controllers.OverlapEventException;
+import int221.oasip.backendus3.controllers.FieldNotValidException;
 import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.dtos.EditEventRequestDTO;
 import int221.oasip.backendus3.entities.Event;
@@ -60,7 +60,7 @@ public class EventService {
             if (overlapEvents.size() > 0) {
                 System.out.println("Overlapping events: ");
                 System.out.println(overlapEvents);
-                throw new OverlapEventException("eventStartTime", "Start time overlaps with another event(s)");
+                throw new FieldNotValidException("eventStartTime", "Start time overlaps with other event(s)");
             }
 
             e.setId(null);
