@@ -4,7 +4,7 @@ import Badge from "../components/Badge.vue";
 import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
 import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
-import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
+import { formatDateTime, sortDescendingByDateInPlace } from "../utils";
 import { useIsLoading } from "../utils/useIsLoading";
 
 
@@ -79,10 +79,6 @@ function startEdit(event) {
 function stopEdit() {
   currentEvent.value = {};
   isEditing.value = false;
-}
-
-function formatDateTime(date) {
-  return `${formatDate(date)} ${formatTime(date)} `;
 }
 
 async function saveEvent(updates) {

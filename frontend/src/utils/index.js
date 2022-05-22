@@ -20,6 +20,10 @@ export function formatDateAndFromToTime(date, durationMinute) {
   return `${formatDate(from)} ${formatTime(from)} - ${formatTime(to)}`;
 }
 
+export function formatDateTime(date) {
+  return `${formatDate(date)} ${formatTime(date)} `;
+}
+
 export function formatTime(date) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
