@@ -17,6 +17,7 @@ const isEditSuccessModalOpen = ref(false);
 const isEditErrorModalOpen = ref(false);
 const isCancelSuccessModalOpen = ref(false);
 const isCancelErrorModalOpen = ref(false);
+const isCancelConfirmModalOpen = ref(false);
 
 const eventTypes = {
   UPCOMING: "upcoming",
@@ -46,23 +47,22 @@ function setEvents(_events) {
   events.value = _events;
 }
 
+const eventToBeDeleted = ref(null);
 
-async function cancelEvent(event) {
-  if (isEditing.value) {
-    return;
-  }
-  if (!confirm(`Cancel event #${event.id} ${event.bookingName}?`)) {
-    return;
-  }
+function startConfirmCancel(event) {
+  eventToBeDeleted.value = event;
+  isCancelConfirmModalOpen.value = true
+}
 
+async function confirmCancelEvent(event) {
   const isSuccess = await deleteEvent(event.id);
+  isCancelConfirmModalOpen.value = false;
   if (isSuccess) {
-    isCancelSuccessModalOpen.value = true;
     events.value = events.value.filter((e) => e.id !== event.id);
+    isCancelSuccessModalOpen.value = true;
   } else {
     isCancelErrorModalOpen.value = true;
   }
-
 }
 
 function selectEvent(event) {
@@ -209,7 +209,7 @@ async function filterEvents() {
 
               <td class="py-2 px-2">
                 <div class="flex space-x-2">
-                  <button @click.stop="cancelEvent(event)"
+                  <button @click.stop="startConfirmCancel(event)"
                     class="text-slate-400 hover:text-red-500 disabled:hover:text-slate-400 text-xs flex items-center justify-center w-8 h-8 rounded-full transition"
                     :disabled="isEditing">
                     <span class="material-symbols-outlined">
@@ -240,7 +240,7 @@ async function filterEvents() {
 
         </table>
 
-        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id">
+        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id && !isCancelConfirmModalOpen">
           <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="isEditing = false" v-if="isEditing"
             @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
@@ -260,6 +260,10 @@ async function filterEvents() {
 
   <Modal title="Error" subtitle="Something went wrong" button-text="Try Again" :is-open="isCancelErrorModalOpen"
     variant="error" @close="isCancelErrorModalOpen = false" />
+
+  <Modal title="Are you sure?" subtitle="This action cannot be undone" type="confirm" button-cancel-text="Cancel"
+    button-confirm-text="Confirm" variant="error" :is-open="isCancelConfirmModalOpen"
+    @close="isCancelConfirmModalOpen = false" @confirm="confirmCancelEvent(eventToBeDeleted)" />
 </template>
 
 <style scoped>
