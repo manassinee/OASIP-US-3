@@ -47,7 +47,7 @@ const emits = defineEmits(['close'])
  
 <template>
   <Teleport to="body">
-    <div class="absolute inset-0 bg-black/50 flex text-slate-700 shadow-2xl" @click="$emit('close')"
+    <div class="absolute inset-0 bg-black/50 flex text-slate-700 shadow-2xl z-50" @click="$emit('close')"
       v-if="props.isOpen">
       <div class="m-auto -translate-y-8 pt-8 px-12 bg-white flex flex-col gap-4 max-w-lg rounded-lg overflow-hidden"
         @click.stop="">
