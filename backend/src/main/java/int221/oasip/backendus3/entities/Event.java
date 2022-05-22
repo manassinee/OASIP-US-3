@@ -2,7 +2,6 @@ package int221.oasip.backendus3.entities;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -11,14 +10,13 @@ import java.time.Instant;
 @Table(name = "event")
 @Getter
 @Setter
-@ToString
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "eventId", nullable = false)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "eventCategoryId", nullable = false)
     private EventCategory eventCategory;
 
