@@ -5,11 +5,13 @@ import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
 import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
 import { formatDate, formatTime, sortDescendingByDateInPlace } from "../utils";
+import { useIsLoading } from "../utils/useIsLoading";
 
 
 const events = ref([]);
 const currentEvent = ref({});
 const categories = ref([]);
+const { isLoading, setIsLoading } = useIsLoading(true);
 
 const eventTypes = {
   UPCOMING: "upcoming",
@@ -30,8 +32,8 @@ const filter = ref({
 onBeforeMount(async () => {
   const events = await getEvents();
   setEvents(events);
-
   categories.value = await getCategories();
+  setIsLoading(false);
 });
 
 function setEvents(_events) {
@@ -116,8 +118,10 @@ async function filterEvents() {
     _filter.startAt = startAt.toISOString();
   }
 
+  setIsLoading(true);
   const events = await getEventsByFilter(_filter);
   setEvents(events);
+  setIsLoading(false);
 }
 </script>
 
@@ -176,7 +180,7 @@ async function filterEvents() {
           </thead>
 
           <tbody class="divide-y">
-            <tr v-if="events.length > 0" v-for="event in events" @click="selectEvent(event)"
+            <tr v-if="!isLoading && events.length > 0" v-for="event in events" @click="selectEvent(event)"
               class="my-10 bg-white relative transition text-slate-600" :class="[{
                 'z-10 bg-blue-200/10 hover:bg-blue-200/20 ring-2 ring-blue-400/50': currentEvent.id === event.id,
                 'cursor-pointer hover:bg-slate-50 shadow-black/5': !isEditing
@@ -223,7 +227,8 @@ async function filterEvents() {
             </tr>
             <tr v-else>
               <td colspan="4" class="p-6 text-center">
-                <span v-if="filter.type === eventTypes.UPCOMING">No On-Going or Upcoming Events</span>
+                <span v-if="isLoading">Loading...</span>
+                <span v-else-if="filter.type === eventTypes.UPCOMING">No On-Going or Upcoming Events</span>
                 <span v-else-if="filter.type === eventTypes.PAST">No Past Events</span>
                 <span v-else>No Scheduled Event</span>
               </td>
