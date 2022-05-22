@@ -50,7 +50,7 @@ export function findOverlap(eventStartTime, duration, existingEvents, eventId) {
     const otherEndTime = new Date(event.eventStartTime);
     otherEndTime.setMinutes(otherEndTime.getMinutes() + event.eventDuration);
 
-    if (eventId && eventId === event.eventId) {
+    if (eventId && eventId === event.id) {
       return false;
     }
 
