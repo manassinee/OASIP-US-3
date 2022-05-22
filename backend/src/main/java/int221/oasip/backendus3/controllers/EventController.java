@@ -2,7 +2,7 @@ package int221.oasip.backendus3.controllers;
 
 import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.dtos.EditEventRequestDTO;
-import int221.oasip.backendus3.entities.Event;
+import int221.oasip.backendus3.dtos.EventResponseDTO;
 import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.exceptions.EventOverlapException;
 import int221.oasip.backendus3.exceptions.FieldNotValidException;
@@ -24,7 +24,7 @@ public class EventController {
     private EventService service;
 
     @GetMapping("")
-    public List<Event> getEvents(
+    public List<EventResponseDTO> getEvents(
             @RequestParam(required = false) Integer categoryId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam(required = false) String type
@@ -61,8 +61,8 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public Event getEventById(@PathVariable Integer id) {
-        Event event = service.getEvent(id);
+    public EventResponseDTO getEventById(@PathVariable Integer id) {
+        EventResponseDTO event = service.getEvent(id);
 
         if (event == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Event with id " + id + " not found");
@@ -73,7 +73,7 @@ public class EventController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public Event create(@Validated @RequestBody CreateEventRequestDTO newEvent) {
+    public EventResponseDTO create(@Validated @RequestBody CreateEventRequestDTO newEvent) {
         try {
             return service.create(newEvent);
         } catch (EventOverlapException e) {
@@ -90,7 +90,7 @@ public class EventController {
     }
 
     @PatchMapping("/{id}")
-    public Event update(@PathVariable Integer id, @Validated @RequestBody EditEventRequestDTO editEvent) {
+    public EventResponseDTO update(@PathVariable Integer id, @Validated @RequestBody EditEventRequestDTO editEvent) {
         if (editEvent.getEventStartTime() == null && editEvent.getEventNotes() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one of eventStartTime or eventNotes must be provided");
         }

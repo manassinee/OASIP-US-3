@@ -2,6 +2,7 @@ package int221.oasip.backendus3.services;
 
 import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.dtos.EditEventRequestDTO;
+import int221.oasip.backendus3.dtos.EventResponseDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.entities.EventCategory;
 import int221.oasip.backendus3.exceptions.EntityNotFoundException;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -23,23 +25,36 @@ public class EventService {
     private ModelMapper modelMapper;
     private EventCategoryRepository categoryRepository;
 
-    public List<Event> getAll() {
-        return repository.findAll();
+    private List<EventResponseDTO> mapListToDTO(List<Event> events) {
+        return events.stream().map(event -> modelMapper.map(event, EventResponseDTO.class)).collect(Collectors.toList());
     }
 
-    public Event getEvent(Integer id) {
-        return repository.findById(id).orElse(null);
+    public List<EventResponseDTO> getAll() {
+        List<Event> events = repository.findAll();
+        return mapListToDTO(events);
     }
 
-    public List<Event> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
-        return repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
+    public EventResponseDTO getEvent(Integer id) {
+        Event event = repository.findById(id).orElse(null);
+
+        if (event == null) {
+            return null;
+        }
+
+        return modelMapper.map(event, EventResponseDTO.class);
     }
 
-    public List<Event> getEventsOnDateStartAt(Instant startAt) {
-        return repository.findByDateRangeOfOneDayStartAt(startAt);
+    public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
+        List<Event> events = repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
+        return mapListToDTO(events);
     }
 
-    public Event create(CreateEventRequestDTO newEvent) {
+    public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt) {
+        List<Event> events = repository.findByDateRangeOfOneDayStartAt(startAt);
+        return mapListToDTO(events);
+    }
+
+    public EventResponseDTO create(CreateEventRequestDTO newEvent) {
         Event e = modelMapper.map(newEvent, Event.class);
         EventCategory category = categoryRepository.findById(newEvent.getEventCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Event category with id " + newEvent.getEventCategoryId() + " not found"));
@@ -62,14 +77,14 @@ public class EventService {
         e.setId(null);
         System.out.println(e);
 
-        return repository.saveAndFlush(e);
+        return modelMapper.map(repository.saveAndFlush(e), EventResponseDTO.class);
     }
 
     public void delete(Integer id) {
         repository.deleteById(id);
     }
 
-    public Event update(Integer id, EditEventRequestDTO editEvent) {
+    public EventResponseDTO update(Integer id, EditEventRequestDTO editEvent) {
         Event event = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Event with id " + id + " not found"));
 
         if (editEvent.getEventNotes() != null) {
@@ -93,28 +108,31 @@ public class EventService {
             }
         }
 
-        return repository.saveAndFlush(event);
+        return modelMapper.map(repository.saveAndFlush(event), EventResponseDTO.class);
     }
 
-    public List<Event> getEventsInCategory(Integer categoryId) {
-        return repository.findByEventCategory_Id(categoryId);
+    public List<EventResponseDTO> getEventsInCategory(Integer categoryId) {
+        List<Event> events = repository.findByEventCategory_Id(categoryId);
+        return mapListToDTO(events);
     }
 
-    public List<Event> getUpcomingAndOngoingEvents(Integer categoryId) {
+    public List<EventResponseDTO> getUpcomingAndOngoingEvents(Integer categoryId) {
         Instant now = Instant.now();
-        return repository.findUpcomingAndOngoingEvents(now, categoryId);
+        List<Event> events = repository.findUpcomingAndOngoingEvents(now, categoryId);
+        return mapListToDTO(events);
     }
 
-    public List<Event> getUpcomingAndOngoingEvents() {
+    public List<EventResponseDTO> getUpcomingAndOngoingEvents() {
         return getUpcomingAndOngoingEvents(null);
     }
 
-    public List<Event> getPastEvents(Integer categoryId) {
+    public List<EventResponseDTO> getPastEvents(Integer categoryId) {
         Instant now = Instant.now();
-        return repository.findPastEvents(now, categoryId);
+        List<Event> events = repository.findPastEvents(now, categoryId);
+        return mapListToDTO(events);
     }
 
-    public List<Event> getPastEvents() {
+    public List<EventResponseDTO> getPastEvents() {
         return getPastEvents(null);
     }
 }
