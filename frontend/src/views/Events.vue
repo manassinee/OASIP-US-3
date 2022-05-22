@@ -171,7 +171,7 @@ async function filterEvents() {
       </div>
       <div class="flex">
         <table
-          class="table-fixed text-left w-8/12 flex-1 break-words border border-slate-200 shadow-xl shadow-black/5 p-4">
+          class="table-fixed text-left w-8/12 flex-1 break-words border border-slate-200 shadow-xl shadow-black/5 p-4 h-full">
 
           <thead class="text-xs text-slate-500 uppercase bg-slate-100 text-left">
             <tr>
@@ -240,7 +240,7 @@ async function filterEvents() {
 
         </table>
 
-        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id && !isCancelConfirmModalOpen">
+        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id">
           <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="isEditing = false" v-if="isEditing"
             @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
