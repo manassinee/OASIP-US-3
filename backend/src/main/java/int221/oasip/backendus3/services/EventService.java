@@ -75,8 +75,22 @@ public class EventService {
         if (editEvent.getEventNotes() != null) {
             event.setEventNotes(editEvent.getEventNotes());
         }
+
         if (editEvent.getEventStartTime() != null) {
-            event.setEventStartTime(Instant.from(editEvent.getEventStartTime()));
+            Instant startTime = Instant.from(editEvent.getEventStartTime());
+            Instant endTime = startTime.plus(event.getEventDuration(), ChronoUnit.MINUTES);
+            Integer categoryId = event.getEventCategory().getId();
+            Integer eventId = event.getId();
+
+            List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, categoryId, eventId);
+
+            if (overlapEvents.size() > 0) {
+                System.out.println("Overlapping events: ");
+                System.out.println(overlapEvents);
+                throw new EventOverlapException();
+            } else {
+                event.setEventStartTime(startTime);
+            }
         }
 
         return repository.saveAndFlush(event);

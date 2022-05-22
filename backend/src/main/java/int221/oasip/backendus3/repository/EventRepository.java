@@ -12,12 +12,18 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     // get all overlap events. there are two scenarios:
     // 1. events that started before the startTime and ended after the startTime
     // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
+    // with optional currentEventId to exclude the current event from the result
     @Query(nativeQuery = true,
             value = "SELECT * FROM event e WHERE " +
                     "e.eventCategoryId = ?3 AND " +
+                    "(?4 IS NULL OR e.eventId <> ?4) AND " +
                     "((e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1) OR " +
                     "(e.eventStartTime >= ?1 AND e.eventStartTime < ?2))")
-    List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId);
+    List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId, Integer currentEventId);
+
+    default List<Event> findOverlapEventsByCategoryId(Instant startTime, Instant endTime, Integer categoryId) {
+        return findOverlapEventsByCategoryId(startTime, endTime, categoryId, null);
+    }
 
     // optional categoryId
     @Query("SELECT E FROM Event E WHERE (?1 IS NULL OR E.eventCategory.id = ?1) AND E.eventStartTime >= ?2 AND E.eventStartTime < ?3")

@@ -97,6 +97,8 @@ public class EventController {
 
         try {
             return service.update(id, editEvent);
+        } catch (EventOverlapException e) {
+            throw new FieldNotValidException("eventStartTime", e.getMessage());
         } catch (EntityNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, e.getMessage());
         }
