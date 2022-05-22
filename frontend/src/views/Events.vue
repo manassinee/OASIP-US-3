@@ -3,6 +3,7 @@ import { onBeforeMount, ref } from "vue";
 import Badge from "../components/Badge.vue";
 import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
+import Modal from "../components/Modal.vue";
 import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
 import { formatDateTime, sortDescendingByDateInPlace } from "../utils";
 import { useIsLoading } from "../utils/useIsLoading";
@@ -12,6 +13,10 @@ const events = ref([]);
 const currentEvent = ref({});
 const categories = ref([]);
 const { isLoading, setIsLoading } = useIsLoading(true);
+const isEditSuccessModalOpen = ref(false);
+const isEditErrorModalOpen = ref(false);
+const isCancelSuccessModalOpen = ref(false);
+const isCancelErrorModalOpen = ref(false);
 
 const eventTypes = {
   UPCOMING: "upcoming",
@@ -53,9 +58,11 @@ async function cancelEvent(event) {
   const isSuccess = await deleteEvent(event.id);
   if (isSuccess) {
     alert(`Delete successfully`);
+    isCancelSuccessModalOpen.value = true;
     events.value = events.value.filter((e) => e.id !== event.id);
   } else {
     alert('Sorry, something went wrong');
+    isCancelErrorModalOpen.value = true;
   }
 
 }
@@ -91,7 +98,9 @@ async function saveEvent(updates) {
       const event = events.value.find((e) => e.id === selectedEventId);
       event.eventStartTime = updatedEvent.eventStartTime;
       event.eventNotes = updatedEvent.eventNotes;
-
+      isEditSuccessModalOpen.value = true;
+    } else {
+      isEditErrorModalOpen.value = true;
     }
   }
 
@@ -241,6 +250,18 @@ async function filterEvents() {
       </div>
     </div>
   </div>
+
+  <Modal title="Success" subtitle="Event has been saved" :is-open="isEditSuccessModalOpen"
+    @close="isEditSuccessModalOpen = false" />
+
+  <Modal title="Error" subtitle="Something went wrong" button-text="Try Again" :is-open="isEditErrorModalOpen"
+    variant="error" @close="isEditErrorModalOpen = false" />
+
+  <Modal title="Success" subtitle="Event has been cancelled" :is-open="isCancelSuccessModalOpen"
+    @close="isCancelSuccessModalOpen = false" />
+
+  <Modal title="Error" subtitle="Something went wrong" button-text="Try Again" :is-open="isCancelErrorModalOpen"
+    variant="error" @close="isCancelErrorModalOpen = false" />
 </template>
 
 <style scoped>
