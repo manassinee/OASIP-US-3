@@ -69,13 +69,10 @@ public class EventService {
         List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, e.getEventCategory().getId());
 
         if (overlapEvents.size() > 0) {
-            System.out.println("Overlapping events: ");
-            System.out.println(overlapEvents);
             throw new EventOverlapException();
         }
 
         e.setId(null);
-        System.out.println(e);
 
         return modelMapper.map(repository.saveAndFlush(e), EventResponseDTO.class);
     }
@@ -100,8 +97,6 @@ public class EventService {
             List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, categoryId, eventId);
 
             if (overlapEvents.size() > 0) {
-                System.out.println("Overlapping events: ");
-                System.out.println(overlapEvents);
                 throw new EventOverlapException();
             } else {
                 event.setEventStartTime(startTime);
