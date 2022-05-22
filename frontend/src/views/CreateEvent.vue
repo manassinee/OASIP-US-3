@@ -1,5 +1,6 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
+import Modal from "../components/Modal.vue";
 import { createEvent, getCategories } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
 import { useValidator } from "../utils/useValidator";
@@ -26,6 +27,9 @@ onBeforeMount(async () => {
 // format: 2022-02-02T02:02
 const minDateTImeLocal = formatDateTimeLocal(new Date());
 
+const isSuccessModalOpen = ref(false);
+const isErrorModalOpen = ref(false);
+
 async function handleSubmit() {
   const event = {
     ...inputs.value,
@@ -39,12 +43,13 @@ async function handleSubmit() {
 
     if (createdEvent) {
       resetInputs();
-      alert('Successfully created the event');
+      isSuccessModalOpen.value = true;
     } else {
-      alert('Sorry, something went wrong');
+      isErrorModalOpen.value = true;
     }
   } catch (errorResponse) {
     if (errorResponse.status !== 400) {
+      isErrorModalOpen.value = true;
       return;
     }
 
@@ -128,6 +133,12 @@ function handleCategoryIdChange() {
         Event</button>
     </form>
   </div>
+
+  <Modal title="Success" subtitle="Event created successfully" :is-open="isSuccessModalOpen"
+    @close="isSuccessModalOpen = false" />
+
+  <Modal title="Error" subtitle="Something went wrong" button-text="Try Again" :is-open="isErrorModalOpen"
+    variant="error" @close="isErrorModalOpen = false" />
 </template>
  
 <style scoped>
