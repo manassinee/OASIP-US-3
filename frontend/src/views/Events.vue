@@ -57,11 +57,9 @@ async function cancelEvent(event) {
 
   const isSuccess = await deleteEvent(event.id);
   if (isSuccess) {
-    alert(`Delete successfully`);
     isCancelSuccessModalOpen.value = true;
     events.value = events.value.filter((e) => e.id !== event.id);
   } else {
-    alert('Sorry, something went wrong');
     isCancelErrorModalOpen.value = true;
   }
 
@@ -243,7 +241,7 @@ async function filterEvents() {
         </table>
 
         <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id">
-          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="stopEdit" v-if="isEditing"
+          <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="isEditing = false" v-if="isEditing"
             @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />
         </div>
