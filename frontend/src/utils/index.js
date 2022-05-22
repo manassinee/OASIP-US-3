@@ -25,7 +25,11 @@ export function formatTime(date) {
 }
 
 export function formatDate(date) {
-  return date.toLocaleDateString();
+  return date.toLocaleDateString([], {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 }
 
 export function findOverlap(eventStartTime, duration, existingEvents, eventId) {
