@@ -1,11 +1,11 @@
 package int221.oasip.backendus3.services;
 
-import int221.oasip.backendus3.controllers.BadRequestException;
-import int221.oasip.backendus3.controllers.FieldNotValidException;
 import int221.oasip.backendus3.dtos.CreateEventRequestDTO;
 import int221.oasip.backendus3.dtos.EditEventRequestDTO;
 import int221.oasip.backendus3.entities.Event;
 import int221.oasip.backendus3.entities.EventCategory;
+import int221.oasip.backendus3.exceptions.EntityNotFoundException;
+import int221.oasip.backendus3.exceptions.EventOverlapException;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
 import int221.oasip.backendus3.repository.EventRepository;
 import lombok.AllArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -28,10 +27,8 @@ public class EventService {
         return repository.findAll();
     }
 
-    public Event getEvent(Integer id){
-        Optional<Event> event = repository.findById(id);
-
-        return event.orElse(null);
+    public Event getEvent(Integer id) {
+        return repository.findById(id).orElse(null);
     }
 
     public List<Event> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
@@ -42,33 +39,28 @@ public class EventService {
         return repository.findByDateRangeOfOneDayStartAt(startAt);
     }
 
-    public Event save(CreateEventRequestDTO newEvent) {
+    public Event create(CreateEventRequestDTO newEvent) {
         Event e = modelMapper.map(newEvent, Event.class);
-        Optional<EventCategory> ec = categoryRepository.findById(newEvent.getEventCategoryId());
+        EventCategory category = categoryRepository.findById(newEvent.getEventCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Event category with id " + newEvent.getEventCategoryId() + " not found"));
 
-        if (ec.isPresent()) {
-            EventCategory category = ec.get();
-            e.setEventCategory(category);
-            e.setEventDuration(category.getEventDuration());
-            e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
+        e.setEventCategory(category);
+        e.setEventDuration(category.getEventDuration());
+        e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
 
-            Instant startTime = e.getEventStartTime();
-            Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
+        Instant startTime = e.getEventStartTime();
+        Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
 
-            List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, e.getEventCategory().getId());
+        List<Event> overlapEvents = repository.findOverlapEventsByCategoryId(startTime, endTime, e.getEventCategory().getId());
 
-            // check if there is overlap
-            if (overlapEvents.size() > 0) {
-                System.out.println("Overlapping events: ");
-                System.out.println(overlapEvents);
-                throw new FieldNotValidException("eventStartTime", "Start time overlaps with other event(s)");
-            }
-
-            e.setId(null);
-            System.out.println(e);
-        } else {
-            return null;
+        if (overlapEvents.size() > 0) {
+            System.out.println("Overlapping events: ");
+            System.out.println(overlapEvents);
+            throw new EventOverlapException();
         }
+
+        e.setId(null);
+        System.out.println(e);
 
         return repository.saveAndFlush(e);
     }
@@ -78,28 +70,16 @@ public class EventService {
     }
 
     public Event update(Integer id, EditEventRequestDTO editEvent) {
-        // get event
-        Optional<Event> e = repository.findById(id);
+        Event event = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Event with id " + id + " not found"));
 
-        // set event fields
-        if (e.isPresent()) {
-            Event event = e.get();
-
-            if (editEvent.getEventStartTime() == null && editEvent.getEventNotes() == null) {
-                throw new BadRequestException("At least one of eventStartTime or eventNotes must be provided");
-            }
-
-            if (editEvent.getEventNotes() != null) {
-                event.setEventNotes(editEvent.getEventNotes());
-            }
-            if (editEvent.getEventStartTime() != null) {
-                event.setEventStartTime(Instant.from(editEvent.getEventStartTime()));
-            }
-
-            return repository.saveAndFlush(event);
+        if (editEvent.getEventNotes() != null) {
+            event.setEventNotes(editEvent.getEventNotes());
+        }
+        if (editEvent.getEventStartTime() != null) {
+            event.setEventStartTime(Instant.from(editEvent.getEventStartTime()));
         }
 
-        return null;
+        return repository.saveAndFlush(event);
     }
 
     public List<Event> getEventsInCategory(Integer categoryId) {
