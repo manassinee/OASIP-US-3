@@ -18,10 +18,22 @@ const props = defineProps({
     type: String,
     default: 'OK',
   },
+  buttonConfirmText: {
+    type: String,
+    default: 'Confirm',
+  },
+  buttonCancelText: {
+    type: String,
+    default: 'Cancel',
+  },
   isOpen: {
     type: Boolean,
     required: true,
   },
+  type: {
+    type: String,
+    default: 'close',
+  }
 });
 
 const iconClass = computed(() => {
@@ -42,7 +54,7 @@ const buttonClass = computed(() => {
   }
 });
 
-const emits = defineEmits(['close'])
+const emits = defineEmits(['close', 'confirm'])
 </script>
  
 <template>
@@ -71,11 +83,24 @@ const emits = defineEmits(['close'])
         </div>
         <div class="flex items-center justify-center p-4 border-t border-gray-200 w-full">
           <div class="flex gap-2">
-            <button
-              class="text-white font-medium py-2 px-12 rounded disabled:opacity-60 disabled:cursor-not-allowed flex-1"
-              :class="buttonClass" @click="$emit('close')">
-              {{ props.buttonText }}
-            </button>
+            <template v-if="props.type === 'close'">
+              <button
+                class="text-white font-medium py-2 px-12 rounded disabled:opacity-60 disabled:cursor-not-allowed flex-1"
+                :class="buttonClass" @click="$emit('close')">
+                {{ props.buttonText }}
+              </button>
+            </template>
+            <template v-if="props.type === 'confirm'">
+              <button
+                class="bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-8 rounded disabled:opacity-60 disabled:cursor-not-allowed flex-1"
+                @click="$emit('close')">
+                {{ props.buttonCancelText }}
+              </button>
+              <button class="text-white font-medium py-2 px-8 rounded flex-1" :class="buttonClass"
+                @click="$emit('confirm')">
+                {{ props.buttonConfirmText }}
+              </button>
+            </template>
           </div>
         </div>
       </div>
