@@ -5,7 +5,7 @@ import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
 import Modal from "../components/Modal.vue";
 import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
-import { formatDateTime, sortDescendingByDateInPlace } from "../utils";
+import { formatDateTime, sortByDateInPlace, sortDirections } from "../utils";
 import { useIsLoading } from "../utils/useIsLoading";
 
 
@@ -43,8 +43,15 @@ onBeforeMount(async () => {
   setIsLoading(false);
 });
 
-function setEvents(_events) {
-  sortDescendingByDateInPlace(_events, (e) => e.eventStartTime);
+function setEvents(_events, sort = sortDirections.DESC) {
+  const dateExtractor = (event) => event.eventStartTime;
+
+  if (sort === sortDirections.DESC) {
+    sortByDateInPlace(_events, dateExtractor, sortDirections.DESC);
+  } else {
+    sortByDateInPlace(_events, dateExtractor, sortDirections.ASC);
+  }
+
   events.value = _events;
 }
 
@@ -128,7 +135,14 @@ async function filterEvents() {
 
   setIsLoading(true);
   const events = await getEventsByFilter(_filter);
-  setEvents(events);
+  const ascending = [eventTypes.UPCOMING, eventTypes.DAY];
+
+  if (ascending.includes(_type)) {
+    setEvents(events, sortDirections.ASC);
+  } else {
+    setEvents(events, sortDirections.DESC);
+  }
+
   setIsLoading(false);
 }
 </script>

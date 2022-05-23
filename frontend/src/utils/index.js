@@ -1,7 +1,18 @@
-export function sortDescendingByDateInPlace(arr, keyExtractor) {
-  return arr.sort((a, b) => {
-    return new Date(keyExtractor(b)).getTime() - new Date(keyExtractor(a)).getTime();
-  });
+export const sortDirections = {
+  ASC: "asc",
+  DESC: "desc",
+}
+
+export function sortByDateInPlace(arr, dateExtractor, direction = sortDirections.DESC) {
+  if (direction === sortDirections.DESC) {
+    return arr.sort((a, b) => {
+      return new Date(dateExtractor(b)).getTime() - new Date(dateExtractor(a)).getTime();
+    });
+  } else {
+    return arr.sort((a, b) => {
+      return new Date(dateExtractor(a)).getTime() - new Date(dateExtractor(b)).getTime();
+    });
+  }
 }
 
 export function formatDateTimeLocal(date) {
