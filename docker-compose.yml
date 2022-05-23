@@ -2,35 +2,31 @@ version: "3"
 
 services:
   db:
-    build: "./db"
+    build: ./db
     volumes:
-      - "./db/data:/var/lib/mysql"
-      - "./db/scripts:/tests"
-    ports:
-      - "3306:3306"
+      - ./db/data:/var/lib/mysql
+      - ./db/scripts:/tests
     env_file:
-      - "./db/.env"
+      - ./db/.env
     environment:
       - TZ=Asia/Bangkok
       - LANG=C.UTF-8
 
   backend:
-    build:
-      context: "./backend"
+    build: ./backend
     depends_on:
       - db
     env_file:
-      - "./backend/.env"
+      - ./backend/.env
     restart: on-failure
     environment:
-      - MYSQL_USER=us3admin
       - MYSQL_HOST=db
       - MYSQL_PORT=3306
       - MYSQL_DATABASE=oasip
 
   frontend:
     build:
-      context: "./frontend"
+      context: ./frontend
       args:
         - VITE_API_URL=/us3/api
         - BASE_URL=/us3
@@ -38,7 +34,7 @@ services:
       - backend
 
   nginx:
-    build: "./nginx"
+    build: ./nginx
     ports:
       - "80:80"
     depends_on:

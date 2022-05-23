@@ -9,7 +9,7 @@ import java.time.OffsetDateTime;
 @Getter
 @Setter
 public class CreateEventRequestDTO {
-    @NotNull
+    @NotNull(message = "Event category ID must not be null")
     private Integer eventCategoryId;
 
     @NotBlank(message = "Booking name must not be blank")

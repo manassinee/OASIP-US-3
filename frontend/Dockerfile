@@ -12,7 +12,7 @@ RUN [ "npm", "run", "build", "--", "--base", "$BASE_URL"]
 
 
 
-FROM nginx:latest AS nginx
+FROM nginx:stable-alpine AS nginx
 
 COPY --from=build /app/dist/ /usr/share/nginx/html/
 
