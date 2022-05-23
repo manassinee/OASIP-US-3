@@ -20,9 +20,10 @@ const isCancelErrorModalOpen = ref(false);
 const isCancelConfirmModalOpen = ref(false);
 
 const eventTypes = {
+  DAY: "day",
   UPCOMING: "upcoming",
   PAST: "past",
-  ALL: null
+  ALL: null,
 };
 
 const categoryTypes = {
@@ -107,18 +108,22 @@ async function saveEvent(updates) {
 
 async function filterEvents() {
   const categoryId = filter.value.categoryId;
-  const type = filter.value.type;
   const date = filter.value.date;
+  let _type = filter.value.type;
   const _filter = {
     categoryId,
-    type,
   };
 
   // add startAt only if all type is selected
-  if (date && type === eventTypes.ALL) {
+  if (date && _type === eventTypes.ALL) {
     const localDate = `${filter.value.date}T00:00:00`;
     const startAt = new Date(localDate);
     _filter.startAt = startAt.toISOString();
+    _type = eventTypes.DAY;
+  }
+
+  if (_type !== eventTypes.ALL) {
+    _filter.type = _type;
   }
 
   setIsLoading(true);
@@ -171,7 +176,7 @@ async function filterEvents() {
       </div>
       <div class="flex">
         <table
-          class="table-fixed text-left w-8/12 flex-1 break-words border border-slate-200 shadow-xl shadow-black/5 p-4">
+          class="table-fixed text-left w-8/12 flex-1 break-words border border-slate-200 shadow-xl shadow-black/5 p-4 h-full">
 
           <thead class="text-xs text-slate-500 uppercase bg-slate-100 text-left">
             <tr>
@@ -240,7 +245,7 @@ async function filterEvents() {
 
         </table>
 
-        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id && !isCancelConfirmModalOpen">
+        <div class="p-4 bg-slate-100 relative w-4/12" v-if="currentEvent.id">
           <EditEvent class="sticky top-24" :currentEvent="currentEvent" @cancel="isEditing = false" v-if="isEditing"
             @save="saveEvent" />
           <EventDetails class="sticky top-24" :currentEvent="currentEvent" @close="currentEvent = {}" v-else />

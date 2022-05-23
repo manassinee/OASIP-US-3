@@ -29,7 +29,7 @@ public class EventController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam(required = false) String type
     ) {
-        if (startAt != null) {
+        if ("day".equalsIgnoreCase(type) && startAt != null) {
             if (categoryId != null) {
                 return service.getEventsOnDateStartAt(startAt.toInstant(), categoryId);
             } else {
