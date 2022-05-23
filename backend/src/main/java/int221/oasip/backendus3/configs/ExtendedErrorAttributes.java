@@ -1,4 +1,4 @@
-package int221.oasip.backendus3.controllers;
+package int221.oasip.backendus3.configs;
 
 import int221.oasip.backendus3.exceptions.FieldNotValidException;
 import org.springframework.boot.web.error.ErrorAttributeOptions;

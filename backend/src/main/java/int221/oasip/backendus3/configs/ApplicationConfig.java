@@ -1,6 +1,5 @@
 package int221.oasip.backendus3.configs;
 
-import int221.oasip.backendus3.controllers.ExtendedErrorAttributes;
 import org.modelmapper.ModelMapper;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.context.annotation.Bean;
