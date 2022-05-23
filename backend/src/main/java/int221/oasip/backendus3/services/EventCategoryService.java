@@ -3,7 +3,7 @@ package int221.oasip.backendus3.services;
 import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
 import int221.oasip.backendus3.dtos.CategoryResponseDTO;
 import int221.oasip.backendus3.entities.EventCategory;
-import int221.oasip.backendus3.exceptions.CategoryNameNotUniqueException;
+import int221.oasip.backendus3.exceptions.NotUniqueException;
 import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
 import lombok.AllArgsConstructor;
@@ -31,7 +31,7 @@ public class EventCategoryService {
             EventCategory existingCategory = repository.findByEventCategoryNameIgnoreCase(strippedName);
 
             if (existingCategory != null && !existingCategory.getId().equals(category.getId())) {
-                throw new CategoryNameNotUniqueException();
+                throw new NotUniqueException("Event category name is not unique");
             }
 
             category.setEventCategoryName(strippedName);
