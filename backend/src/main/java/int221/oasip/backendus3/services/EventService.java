@@ -55,13 +55,16 @@ public class EventService {
     }
 
     public EventResponseDTO create(CreateEventRequestDTO newEvent) {
-        Event e = modelMapper.map(newEvent, Event.class);
+        Event e = new Event();
         EventCategory category = categoryRepository.findById(newEvent.getEventCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Event category with id " + newEvent.getEventCategoryId() + " not found"));
 
+        e.setBookingName(newEvent.getBookingName().strip());
+        e.setBookingEmail(newEvent.getBookingEmail().strip());
+        e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
+        e.setEventNotes(newEvent.getEventNotes().strip());
         e.setEventCategory(category);
         e.setEventDuration(category.getEventDuration());
-        e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
 
         Instant startTime = e.getEventStartTime();
         Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
@@ -85,7 +88,7 @@ public class EventService {
         Event event = repository.findById(id).orElseThrow(() -> new EntityNotFoundException("Event with id " + id + " not found"));
 
         if (editEvent.getEventNotes() != null) {
-            event.setEventNotes(editEvent.getEventNotes());
+            event.setEventNotes(editEvent.getEventNotes().strip());
         }
 
         if (editEvent.getEventStartTime() != null) {
