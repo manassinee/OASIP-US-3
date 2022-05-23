@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import CreateEvent from "../views/CreateEvent.vue";
 import Events from "../views/Events.vue";
+import CategoryEvent from "../views/CategoryEvent.vue";
 
 const history = createWebHistory(import.meta.env.BASE_URL);
 
@@ -15,6 +16,11 @@ const routes = [
     name: "createEvent",
     component: CreateEvent,
   },
+  {
+    path: "/category-event",
+    name: "categoryEvent",
+    component: CategoryEvent,
+  }
 ];
 
 const router = createRouter({
