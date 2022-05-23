@@ -86,3 +86,44 @@ export async function getEventsByCategoryIdOnDate(categoryId, startAt) {
     console.log("Cannot fetch events");
   }
 }
+
+export async function getEventsByCategoryId(categoryId) {
+  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}`));
+  if (response.status === 200) {
+    const events = response.json();
+    return events;
+  } else {
+    console.log("Cannot fetch events");
+  }
+}
+
+export async function getEventsByFilter(filter) {
+  const { categoryId, type, startAt } = filter;
+
+  let uri = "/events?";
+  const filters = [];
+
+  if (categoryId) {
+    filters.push(`categoryId=${categoryId}`);
+  }
+
+  if (type) {
+    filters.push(`type=${type}`);
+  }
+
+  if (startAt) {
+    filters.push(`startAt=${startAt}`);
+  }
+
+  if (filters.length > 0) {
+    uri += filters.join("&");
+  }
+
+  const response = await fetch(makeUrl(uri));
+  if (response.status === 200) {
+    const events = response.json();
+    return events;
+  } else {
+    console.log("Cannot fetch events");
+  }
+}

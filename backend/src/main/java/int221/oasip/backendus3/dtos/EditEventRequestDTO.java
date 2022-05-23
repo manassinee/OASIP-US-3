@@ -16,9 +16,4 @@ public class EditEventRequestDTO {
 
     @Size(max = 500, message = "Event notes must be less than 500 characters")
     private String eventNotes;
-
-    @AssertTrue(message = "At least one of eventStartTime and eventNotes must be set")
-    private boolean isRequired() {
-        return eventStartTime != null || eventNotes != null;
-    }
 }

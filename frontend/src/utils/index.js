@@ -5,14 +5,12 @@ export function sortDescendingByDateInPlace(arr, keyExtractor) {
 }
 
 export function formatDateTimeLocal(date) {
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-
-  const formatted = `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}T${hours < 10 ? '0' : ''}${hours}:${minutes < 10 ? '0' : ''}${minutes}`;
-  return formatted;
+  const copiedDate = new Date(date);
+  const offset = copiedDate.getTimezoneOffset();
+  // add the offset before converting to UTC, result in local time
+  // offset is -420 min. for UTC+7, thus --420 = +420
+  copiedDate.setMinutes(copiedDate.getMinutes() - offset, 0, 0);
+  return copiedDate.toISOString().slice(0, -1);
 }
 
 export function formatDateAndFromToTime(date, durationMinute) {
@@ -22,10 +20,65 @@ export function formatDateAndFromToTime(date, durationMinute) {
   return `${formatDate(from)} ${formatTime(from)} - ${formatTime(to)}`;
 }
 
+export function formatDateTime(date) {
+  return `${formatDate(date)} ${formatTime(date)} `;
+}
+
 export function formatTime(date) {
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
 export function formatDate(date) {
-  return date.toLocaleDateString();
+  return date.toLocaleDateString([], {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+export function findOverlap(eventStartTime, duration, existingEvents, eventId) {
+  console.log("findOverlap", eventStartTime, duration, existingEvents, eventId);
+  const startTime = new Date(eventStartTime);
+  const endTime = new Date(startTime);
+  endTime.setMinutes(startTime.getMinutes() + duration);
+  const formatter = Intl.DateTimeFormat([], { dateStyle: 'medium', timeStyle: 'short' })
+
+  console.log(`=== checking overlap for ${formatter.format(startTime)} | ${formatter.format(endTime)} ===`);
+
+  const overlapEvents = existingEvents.filter(event => {
+    const otherStartTime = new Date(event.eventStartTime);
+    const otherEndTime = new Date(event.eventStartTime);
+    otherEndTime.setMinutes(otherEndTime.getMinutes() + event.eventDuration);
+
+    if (eventId && eventId === event.id) {
+      return false;
+    }
+
+    // all overlap events. there are two scenarios:
+    // 1. events that started before the startTime and ended after the startTime
+    // 2. events that started between the startTime (inclusive) and the endTime (exclusive)
+    const isPastOverlap = otherStartTime.getTime() < startTime.getTime() && otherEndTime.getTime() > startTime.getTime();
+    const isFutureOverlap = otherStartTime.getTime() >= startTime.getTime() && otherStartTime.getTime() < endTime.getTime();
+
+    if (isPastOverlap || isFutureOverlap) {
+      if (isPastOverlap) {
+        console.log('> type: past overlap');
+      }
+      if (isFutureOverlap) {
+        console.log('> type: future overlap');
+      }
+
+      console.log(`startTime: ${formatter.format(startTime)} | endTime: ${formatter.format(endTime)}`);
+      console.log(`otherStartTime: ${formatter.format(otherStartTime)} | otherEndTime: ${formatter.format(otherEndTime)}`);
+      return true;
+    }
+
+    return false;
+  });
+
+  if (overlapEvents.length === 0) {
+    console.log(`no overlap at ${formatter.format(startTime)}`);
+  }
+
+  return overlapEvents;
 }

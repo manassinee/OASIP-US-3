@@ -15,7 +15,6 @@
  
 <style scoped>
 .router-link-active {
-  @apply text-sky-600;
+  @apply text-sky-600 bg-sky-50;
 }
-
 </style>
