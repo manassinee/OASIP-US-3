@@ -20,9 +20,10 @@ const isCancelErrorModalOpen = ref(false);
 const isCancelConfirmModalOpen = ref(false);
 
 const eventTypes = {
+  DAY: "day",
   UPCOMING: "upcoming",
   PAST: "past",
-  ALL: null
+  ALL: null,
 };
 
 const categoryTypes = {
@@ -107,18 +108,22 @@ async function saveEvent(updates) {
 
 async function filterEvents() {
   const categoryId = filter.value.categoryId;
-  const type = filter.value.type;
   const date = filter.value.date;
+  let _type = filter.value.type;
   const _filter = {
     categoryId,
-    type,
   };
 
   // add startAt only if all type is selected
-  if (date && type === eventTypes.ALL) {
+  if (date && _type === eventTypes.ALL) {
     const localDate = `${filter.value.date}T00:00:00`;
     const startAt = new Date(localDate);
     _filter.startAt = startAt.toISOString();
+    _type = eventTypes.DAY;
+  }
+
+  if (_type !== eventTypes.ALL) {
+    _filter.type = _type;
   }
 
   setIsLoading(true);
