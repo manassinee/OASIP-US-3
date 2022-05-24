@@ -1,15 +1,13 @@
 <script setup>
 import { onBeforeMount, ref } from "vue";
 import { getCategories } from "../service/api";
-// import { CategoryDetails } from "../components/CategoryDetails.vue";
-import { sortDescendingByDateInPlace } from "../utils";
 
 const categories = ref([]);
 const currentCategory = ref({});
 
 onBeforeMount(async () => {
   const c = await getCategories();
-  sortDescendingByDateInPlace(c, (c) => c.eventStartTime);
+  // sortDescendingByDateInPlace(c, (c) => c.eventStartTime);
   categories.value = c;
 });
 
