@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
   category: {
@@ -47,7 +47,7 @@ function validateName(e) {
 }
 
 function isNameUnique(name) {
-  const existingCategory = props.categories.find((category) => category.eventCategoryName.toLowerCase() === name.toLowerCase() && category.id != props.category.id)
+  const existingCategory = props.categories.find((category) => category.eventCategoryName.toLowerCase() === name.trim().toLowerCase() && category.id != props.category.id)
   if (existingCategory) {
     return false;
   }
