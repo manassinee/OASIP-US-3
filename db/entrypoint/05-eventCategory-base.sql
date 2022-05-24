@@ -1,6 +1,7 @@
 USE oasip;
 
 DELETE FROM eventCategory;
+ALTER TABLE event AUTO_INCREMENT = 1;
 
 INSERT INTO
   eventCategory (
