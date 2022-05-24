@@ -3,15 +3,15 @@ package int221.oasip.backendus3.controllers;
 import int221.oasip.backendus3.dtos.CategoryResponseDTO;
 import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
 import int221.oasip.backendus3.entities.EventCategory;
-import int221.oasip.backendus3.exceptions.NotUniqueException;
 import int221.oasip.backendus3.exceptions.FieldNotValidException;
+import int221.oasip.backendus3.exceptions.NotUniqueException;
 import int221.oasip.backendus3.services.EventCategoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -26,7 +26,7 @@ public class EventCategoryController {
     }
 
     @PatchMapping("/{id}")
-    public CategoryResponseDTO update(@PathVariable Integer id, @Validated @RequestBody EditCategoryRequestDTO editCategory) {
+    public CategoryResponseDTO update(@PathVariable Integer id, @Valid @RequestBody EditCategoryRequestDTO editCategory) {
         if (editCategory.getEventCategoryName() == null &&
                 editCategory.getEventCategoryDescription() == null &&
                 editCategory.getEventDuration() == null) {

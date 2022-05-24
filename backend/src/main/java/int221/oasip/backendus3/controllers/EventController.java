@@ -10,10 +10,10 @@ import int221.oasip.backendus3.services.EventService;
 import lombok.AllArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -73,7 +73,7 @@ public class EventController {
 
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventResponseDTO create(@Validated @RequestBody CreateEventRequestDTO newEvent) {
+    public EventResponseDTO create(@Valid @RequestBody CreateEventRequestDTO newEvent) {
         try {
             return service.create(newEvent);
         } catch (EventOverlapException e) {
@@ -90,7 +90,7 @@ public class EventController {
     }
 
     @PatchMapping("/{id}")
-    public EventResponseDTO update(@PathVariable Integer id, @Validated @RequestBody EditEventRequestDTO editEvent) {
+    public EventResponseDTO update(@PathVariable Integer id, @Valid @RequestBody EditEventRequestDTO editEvent) {
         if (editEvent.getEventStartTime() == null && editEvent.getEventNotes() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one of eventStartTime or eventNotes must be provided");
         }
