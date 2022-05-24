@@ -3,6 +3,7 @@ package int221.oasip.backendus3.services;
 import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
 import int221.oasip.backendus3.dtos.CategoryResponseDTO;
 import int221.oasip.backendus3.entities.EventCategory;
+import int221.oasip.backendus3.exceptions.FieldNotValidException;
 import int221.oasip.backendus3.exceptions.NotUniqueException;
 import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
@@ -28,6 +29,9 @@ public class EventCategoryService {
 
         if (editCategory.getEventCategoryName() != null) {
             String strippedName = editCategory.getEventCategoryName().strip();
+            if (strippedName.length() == 0) {
+                throw new FieldNotValidException("eventCategoryName", "Category name cannot be empty");
+            }
             EventCategory existingCategory = repository.findByEventCategoryNameIgnoreCase(strippedName);
 
             if (existingCategory != null && !existingCategory.getId().equals(category.getId())) {
