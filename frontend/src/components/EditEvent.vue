@@ -1,6 +1,6 @@
 <script setup>
 import { formatDateTimeLocal } from '../utils';
-import { useValidator } from '../utils/useValidator';
+import { useEventValidator } from '../utils/useEventValidator';
 import Badge from './Badge.vue';
 
 const props = defineProps({
@@ -26,7 +26,7 @@ const {
   canSubmit,
   setEventId,
   setCategoryId
-} = useValidator();
+} = useEventValidator();
 
 
 // only use three fields for now (including eventCategoryId)

@@ -6,7 +6,7 @@ import { getEventsByCategoryIdOnDate } from "../service/api";
 
 const defaultValue = '';
 
-export function useValidator() {
+export function useEventValidator() {
   function makeDefaultValues() {
     return {
       bookingName: defaultValue,

@@ -3,7 +3,7 @@ import { onBeforeMount, ref } from "vue";
 import Modal from "../components/Modal.vue";
 import { createEvent, getCategories } from "../service/api";
 import { formatDateTimeLocal } from "../utils";
-import { useValidator } from "../utils/useValidator";
+import { useEventValidator } from "../utils/useEventValidator";
 
 const categories = ref([]);
 const {
@@ -17,7 +17,7 @@ const {
   setEventDuration,
   resetInputs,
   canSubmit
-} = useValidator();
+} = useEventValidator();
 
 
 onBeforeMount(async () => {
