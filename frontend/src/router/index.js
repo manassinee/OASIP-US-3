@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory } from "vue-router";
 import CreateEvent from "../views/CreateEvent.vue";
 import Events from "../views/Events.vue";
 import CategoryEvent from "../views/CategoryEvent.vue";
@@ -17,10 +17,10 @@ const routes = [
     component: CreateEvent,
   },
   {
-    path: "/category-event",
-    name: "categoryEvent",
+    path: "/categories",
+    name: "categories",
     component: CategoryEvent,
-  }
+  },
 ];
 
 const router = createRouter({

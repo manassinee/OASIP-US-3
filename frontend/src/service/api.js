@@ -49,7 +49,7 @@ export async function createEvent(newEvent) {
 //DELETE
 export async function deleteEvent(id) {
   const response = await fetch(makeUrl(`/events/${id}`), {
-    method: "DELETE"
+    method: "DELETE",
   });
 
   if (response.status === 200) {
@@ -65,9 +65,9 @@ export async function updateEvent(id, editEvent) {
   const response = await fetch(makeUrl(`/events/${id}`), {
     method: "PATCH",
     headers: {
-      "content-type": "application/json"
+      "content-type": "application/json",
     },
-    body: JSON.stringify(editEvent)
+    body: JSON.stringify(editEvent),
   });
   if (response.status === 200) {
     const updatedEvent = await response.json();
@@ -78,7 +78,9 @@ export async function updateEvent(id, editEvent) {
 }
 
 export async function getEventsByCategoryIdOnDate(categoryId, startAt) {
-  const response = await fetch(makeUrl(`/events?categoryId=${categoryId}&startAt=${startAt}`));
+  const response = await fetch(
+    makeUrl(`/events?categoryId=${categoryId}&startAt=${startAt}`)
+  );
   if (response.status === 200) {
     const events = response.json();
     return events;
@@ -125,5 +127,21 @@ export async function getEventsByFilter(filter) {
     return events;
   } else {
     console.log("Cannot fetch events");
+  }
+}
+
+export async function updateCategory(id, editCategory) {
+  const response = await fetch(makeUrl(`/categories/${id}`), {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify(editCategory),
+  });
+  if (response.status === 200) {
+    const updatedCategory = await response.json();
+    return updatedCategory;
+  } else {
+    console.log("Cannot edit category");
   }
 }

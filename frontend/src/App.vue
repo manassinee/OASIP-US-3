@@ -3,12 +3,11 @@
  
 <template>
   <nav class="bg-white px-12 py-4 flex border-b border-gray-200">
-    <div class="flex items-center gap-2 text-sm font-medium">
+    <div class="flex items-center gap-1 text-sm font-medium">
       <router-link to="/" class="p-2 rounded-md text-gray-700 hover:text-sky-600">Events</router-link>
       <router-link :to="{ name: 'createEvent' }" class="p-2 rounded-md text-gray-700 hover:text-sky-600">Create
         Event</router-link>
-      <router-link :to="{ name: 'categoryEvent' }" class="p-2 text-gray-700 hover:text-sky-600">Category Event
-      </router-link>
+      <router-link :to="{ name: 'categories' }" class="p-2 ml-2 text-gray-700 hover:text-sky-600">Categories</router-link>
     </div>
   </nav>
 
