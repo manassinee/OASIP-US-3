@@ -62,9 +62,11 @@ public class EventService {
         e.setBookingName(newEvent.getBookingName().strip());
         e.setBookingEmail(newEvent.getBookingEmail().strip());
         e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
-        e.setEventNotes(newEvent.getEventNotes().strip());
         e.setEventCategory(category);
         e.setEventDuration(category.getEventDuration());
+        if (e.getEventNotes() != null) {
+            e.setEventNotes(newEvent.getEventNotes().strip());
+        }
 
         Instant startTime = e.getEventStartTime();
         Instant endTime = startTime.plus(e.getEventDuration(), ChronoUnit.MINUTES);
