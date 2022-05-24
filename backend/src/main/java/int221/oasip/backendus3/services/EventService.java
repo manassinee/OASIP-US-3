@@ -64,7 +64,7 @@ public class EventService {
         e.setEventStartTime(Instant.from(newEvent.getEventStartTime()));
         e.setEventCategory(category);
         e.setEventDuration(category.getEventDuration());
-        if (e.getEventNotes() != null) {
+        if (newEvent.getEventNotes() != null) {
             e.setEventNotes(newEvent.getEventNotes().strip());
         }
 
