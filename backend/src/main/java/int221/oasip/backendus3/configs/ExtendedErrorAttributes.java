@@ -20,20 +20,22 @@ public class ExtendedErrorAttributes extends DefaultErrorAttributes {
         Map<String, Object> errorAttributes = super.getErrorAttributes(webRequest, options);
         Throwable error = super.getError(webRequest);
         String VALIDATION_ERROR_MESSAGE = "Validation failed";
+        String MESSAGE_ATTRIBUTE = "message";
+        String ERRORS_ATTRIBUTE = "errors";
 
         if (error instanceof MethodArgumentNotValidException) {
-            errorAttributes.put("message", VALIDATION_ERROR_MESSAGE);
-            errorAttributes.put("errors", makeValidationErrorMap((MethodArgumentNotValidException) error));
+            errorAttributes.put(MESSAGE_ATTRIBUTE, VALIDATION_ERROR_MESSAGE);
+            errorAttributes.put(ERRORS_ATTRIBUTE, makeValidationErrorMap((MethodArgumentNotValidException) error));
         }
 
         if (error instanceof FieldNotValidException) {
-            errorAttributes.put("message", VALIDATION_ERROR_MESSAGE);
-            errorAttributes.put("errors", makeValidationErrorMap((FieldNotValidException) error));
+            errorAttributes.put(MESSAGE_ATTRIBUTE, VALIDATION_ERROR_MESSAGE);
+            errorAttributes.put(ERRORS_ATTRIBUTE, makeValidationErrorMap((FieldNotValidException) error));
         }
 
         if (error instanceof ResponseStatusException) {
             ResponseStatusException exception = (ResponseStatusException) error;
-            errorAttributes.put("message", exception.getReason());
+            errorAttributes.put(MESSAGE_ATTRIBUTE, exception.getReason());
         }
 
         return errorAttributes;
