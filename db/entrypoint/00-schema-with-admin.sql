@@ -24,8 +24,10 @@ CREATE TABLE IF NOT EXISTS `oasip`.`eventCategory` (
   `eventCategoryDescription` VARCHAR(500) NULL,
   `eventDuration` INT NOT NULL,
   PRIMARY KEY (`eventCategoryId`),
-  UNIQUE INDEX `eventCategoryName_UNIQUE` (`eventCategoryName` ASC) VISIBLE)
+  UNIQUE INDEX `eventCategoryName_UNIQUE` (`eventCategoryName` ASC) VISIBLE,
+  CHECK (eventDuration BETWEEN 1 AND 480))
 ENGINE = InnoDB;
+
 
 -- -----------------------------------------------------
 -- Table `oasip`.`event`
@@ -38,8 +40,10 @@ CREATE TABLE IF NOT EXISTS `oasip`.`event` (
   `eventDuration` INT NOT NULL,
   `eventNotes` VARCHAR(500) NULL,
   `eventCategoryId` INT NOT NULL,
-  PRIMARY KEY (`eventId`, `eventCategoryId`),
+  PRIMARY KEY (`eventId`),
   INDEX `fk_event_eventCategory_idx` (`eventCategoryId` ASC) VISIBLE,
+  INDEX `eventStartTime_idx` (`eventStartTime` ASC) VISIBLE,
+  INDEX `eventCategoryId_eventStartTime_idx` (`eventCategoryId` ASC, `eventStartTime` ASC) VISIBLE,
   CONSTRAINT `fk_event_eventCategory`
     FOREIGN KEY (`eventCategoryId`)
     REFERENCES `oasip`.`eventCategory` (`eventCategoryId`)
