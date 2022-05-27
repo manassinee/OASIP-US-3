@@ -39,14 +39,20 @@ setEventId(props.currentEvent.id);
 setEventDuration(props.currentEvent.eventDuration);
 setCategoryId(props.currentEvent.eventCategory.id);
 
-// pre validate start time (hacky for now)
-validateStartTime({ target: { value: inputs.value.eventStartTime } });
-
 function handleSaveClick() {
-  const eventStartTime = new Date(inputs.value.eventStartTime).toISOString();
-  const eventNotes = inputs.value.eventNotes;
+  const updates = {};
 
-  emits('save', { eventStartTime, eventNotes });
+  const newDate = new Date(inputs.value.eventStartTime);
+  if (newDate.getTime() !== new Date(props.currentEvent.eventStartTime).getTime()) {
+    updates.eventStartTime = newDate.toISOString();
+  }
+
+  const newNotes = inputs.value.eventNotes;
+  if (newNotes !== props.currentEvent.eventNotes) {
+    updates.eventNotes = newNotes;
+  }
+
+  emits('save', updates);
 }
 </script>
  
