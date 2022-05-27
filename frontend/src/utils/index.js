@@ -93,3 +93,8 @@ export function findOverlap(eventStartTime, duration, existingEvents, eventId) {
 
   return overlapEvents;
 }
+
+export const inputConstraits = {
+  MAX_DATE: "9999-12-31",
+  MAX_DATETIME_LOCAL: "9999-12-31T23:59",
+};

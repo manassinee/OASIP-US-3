@@ -5,7 +5,7 @@ import EditEvent from "../components/EditEvent.vue";
 import EventDetails from "../components/EventDetails.vue";
 import Modal from "../components/Modal.vue";
 import { deleteEvent, getCategories, getEvents, getEventsByFilter, updateEvent } from "../service/api";
-import { formatDateTime, sortByDateInPlace, sortDirections } from "../utils";
+import { formatDateTime, inputConstraits, sortByDateInPlace, sortDirections } from "../utils";
 import { useIsLoading } from "../utils/useIsLoading";
 
 
@@ -182,7 +182,8 @@ async function filterEvents() {
               <label class="text-xs text-slate-600">Date</label>
               <input v-model="filter.date"
                 class="text-sm bg-white border border-gray-200 shadow-md shadow-gray-500/5 rounded-sm p-1 disabled:bg-slate-200 disabled:text-slate-400"
-                type="date" @change="filterEvents" :disabled="filter.type !== eventTypes.ALL">
+                type="date" @change="filterEvents" :disabled="filter.type !== eventTypes.ALL"
+                :max="inputConstraits.MAX_DATE" />
             </div>
           </div>
 

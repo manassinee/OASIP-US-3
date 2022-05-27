@@ -2,7 +2,7 @@
 import { onBeforeMount, ref } from "vue";
 import Modal from "../components/Modal.vue";
 import { createEvent, getCategories } from "../service/api";
-import { formatDateTimeLocal } from "../utils";
+import { formatDateTimeLocal, inputConstraits } from "../utils";
 import { useEventValidator } from "../utils/useEventValidator";
 
 const categories = ref([]);
@@ -96,8 +96,8 @@ function handleCategoryIdChange() {
 
       <div class="flex flex-col gap-2">
         <label for="startTime" class="required text-sm font-medium text-gray-700">Start Time</label>
-        <input id="startTime" type="datetime-local" :min="minDateTImeLocal" v-model="inputs.eventStartTime" required
-          class="bg-gray-100 p-2 rounded" @input="validateStartTime">
+        <input id="startTime" type="datetime-local" :min="minDateTImeLocal" :max="inputConstraits.MAX_DATETIME_LOCAL"
+          v-model="inputs.eventStartTime" required class="bg-gray-100 p-2 rounded" @input="validateStartTime">
         <div v-if="errors.eventStartTime.length > 0 || errors.hasOverlappingEvents"
           class="text-red-500 text-sm bg-red-50 py-1 px-2 mx-1 rounded-md flex flex-col">
           <span v-for="error in errors.eventStartTime">{{ error }}</span>
