@@ -21,6 +21,9 @@ import java.util.List;
 @RequestMapping("/api/events")
 @AllArgsConstructor
 public class EventController {
+    public static final String DAY = "day";
+    public static final String UPCOMING = "upcoming";
+    public static final String PAST = "past";
     private EventService service;
 
     @GetMapping("")
@@ -29,35 +32,27 @@ public class EventController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) OffsetDateTime startAt,
             @RequestParam(required = false) String type
     ) {
-        if ("day".equalsIgnoreCase(type) && startAt != null) {
-            if (categoryId != null) {
+        if (categoryId != null) {
+            if (DAY.equalsIgnoreCase(type) && startAt != null) {
                 return service.getEventsOnDate(startAt.toInstant(), categoryId);
-            } else {
-                return service.getEventsOnDate(startAt.toInstant());
-            }
-        }
-
-        if ("upcoming".equalsIgnoreCase(type)) {
-            if (categoryId != null) {
+            } else if (UPCOMING.equalsIgnoreCase(type)) {
                 return service.getUpcomingAndOngoingEvents(categoryId);
-            } else {
-                return service.getUpcomingAndOngoingEvents();
-            }
-        }
-
-        if ("past".equalsIgnoreCase(type)) {
-            if (categoryId != null) {
+            } else if (PAST.equalsIgnoreCase(type)) {
                 return service.getPastEvents(categoryId);
             } else {
+                return service.getEventsInCategory(categoryId);
+            }
+        } else {
+            if (DAY.equalsIgnoreCase(type) && startAt != null) {
+                return service.getEventsOnDate(startAt.toInstant());
+            } else if (UPCOMING.equalsIgnoreCase(type)) {
+                return service.getUpcomingAndOngoingEvents();
+            } else if (PAST.equalsIgnoreCase(type)) {
                 return service.getPastEvents();
+            } else {
+                return service.getAll();
             }
         }
-
-        if (categoryId != null) {
-            return service.getEventsInCategory(categoryId);
-        }
-
-        return service.getAll();
     }
 
     @GetMapping("/{id}")
