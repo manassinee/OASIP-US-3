@@ -1,12 +1,13 @@
 package int221.oasip.backendus3.services;
 
-import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
 import int221.oasip.backendus3.dtos.CategoryResponseDTO;
+import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
 import int221.oasip.backendus3.entities.EventCategory;
+import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.exceptions.FieldNotValidException;
 import int221.oasip.backendus3.exceptions.NotUniqueException;
-import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
+import int221.oasip.backendus3.utils.ModelMapperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,10 @@ import java.util.List;
 public class EventCategoryService {
     private EventCategoryRepository repository;
     private ModelMapper modelMapper;
+    private ModelMapperUtils modelMapperUtils;
 
-    public List<EventCategory> getAll() {
-        List<EventCategory> categories = repository.findAll();
-        return categories;
+    public List<CategoryResponseDTO> getAll() {
+        return modelMapperUtils.mapList(repository.findAll(), CategoryResponseDTO.class);
     }
 
     public CategoryResponseDTO update(Integer id, EditCategoryRequestDTO editCategory) {

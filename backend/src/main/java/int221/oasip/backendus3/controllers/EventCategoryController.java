@@ -2,7 +2,6 @@ package int221.oasip.backendus3.controllers;
 
 import int221.oasip.backendus3.dtos.CategoryResponseDTO;
 import int221.oasip.backendus3.dtos.EditCategoryRequestDTO;
-import int221.oasip.backendus3.entities.EventCategory;
 import int221.oasip.backendus3.exceptions.FieldNotValidException;
 import int221.oasip.backendus3.exceptions.NotUniqueException;
 import int221.oasip.backendus3.services.EventCategoryService;
@@ -21,7 +20,7 @@ public class EventCategoryController {
     private EventCategoryService service;
 
     @GetMapping("")
-    public List<EventCategory> getCategories() {
+    public List<CategoryResponseDTO> getCategories() {
         return service.getAll();
     }
 

@@ -9,6 +9,7 @@ import int221.oasip.backendus3.exceptions.EntityNotFoundException;
 import int221.oasip.backendus3.exceptions.EventOverlapException;
 import int221.oasip.backendus3.repository.EventCategoryRepository;
 import int221.oasip.backendus3.repository.EventRepository;
+import int221.oasip.backendus3.utils.ModelMapperUtils;
 import lombok.AllArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -16,22 +17,18 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class EventService {
     private EventRepository repository;
     private ModelMapper modelMapper;
+    private ModelMapperUtils modelMapperUtils;
     private EventCategoryRepository categoryRepository;
-
-    private List<EventResponseDTO> mapListToDTO(List<Event> events) {
-        return events.stream().map(event -> modelMapper.map(event, EventResponseDTO.class)).collect(Collectors.toList());
-    }
 
     public List<EventResponseDTO> getAll() {
         List<Event> events = repository.findAll();
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public EventResponseDTO getEvent(Integer id) {
@@ -46,12 +43,12 @@ public class EventService {
 
     public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
         List<Event> events = repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt) {
         List<Event> events = repository.findByDateRangeOfOneDayStartAt(startAt);
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public EventResponseDTO create(CreateEventRequestDTO newEvent) {
@@ -113,13 +110,13 @@ public class EventService {
 
     public List<EventResponseDTO> getEventsInCategory(Integer categoryId) {
         List<Event> events = repository.findByEventCategory_Id(categoryId);
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public List<EventResponseDTO> getUpcomingAndOngoingEvents(Integer categoryId) {
         Instant now = Instant.now();
         List<Event> events = repository.findUpcomingAndOngoingEvents(now, categoryId);
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public List<EventResponseDTO> getUpcomingAndOngoingEvents() {
@@ -129,7 +126,7 @@ public class EventService {
     public List<EventResponseDTO> getPastEvents(Integer categoryId) {
         Instant now = Instant.now();
         List<Event> events = repository.findPastEvents(now, categoryId);
-        return mapListToDTO(events);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
     public List<EventResponseDTO> getPastEvents() {
