@@ -33,17 +33,21 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
     @Query("SELECT E FROM Event E WHERE (?1 IS NULL OR E.eventCategory.id = ?1) AND E.eventStartTime >= ?2 AND E.eventStartTime < ?3")
     List<Event> findByDateRange(Integer categoryId, Instant fromInclusive, Instant toExclusive);
 
-    default List<Event> findByDateRangeOfOneDayStartAtAndCategoryId(Instant startAt, Integer categoryId) {
+    default List<Event> findByDateRangeOfOneDay(Instant startAt, Integer categoryId) {
         Instant endAt = startAt.plus(1, ChronoUnit.DAYS);
         return findByDateRange(categoryId, startAt, endAt);
+    }
+
+    default List<Event> findByDateRangeOfOneDay(Instant startAt) {
+        return findByDateRangeOfOneDay(startAt, null);
     }
 
     List<Event> findByEventCategory_Id(Integer categoryId);
 
     // get upcoming and ongoing events, with these constraints:
     // 1. categoryId is optional.
-    // 2. events that start after now (upcoming)
-    // 3. event that start before now but end after now (ongoing)
+    // 2. events that start after startAt (upcoming)
+    // 3. event that start before startAt but end after startAt (ongoing)
     @Query(nativeQuery = true,
             value = "SELECT * FROM event e WHERE " +
                     // optional categoryId
@@ -54,10 +58,18 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
                     "(e.eventStartTime <= ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) > ?1))")
     List<Event> findUpcomingAndOngoingEvents(Instant startAt, Integer categoryId);
 
-    // get past events (start before now and end at or before now)
+    default List<Event> findUpcomingAndOngoingEvents(Instant startAt) {
+        return findUpcomingAndOngoingEvents(startAt, null);
+    }
+
+    // get past events (start before startAt and end at or before startAt)
     @Query(nativeQuery = true,
             value = "SELECT * FROM event e WHERE " +
                     "(?2 IS NULL OR e.eventCategoryId = ?2) AND " + // optional categoryId
                     "(e.eventStartTime < ?1 AND (e.eventStartTime + INTERVAL e.eventDuration MINUTE) <= ?1)")
-    List<Event> findPastEvents(Instant now, Integer categoryId);
+    List<Event> findPastEvents(Instant startAt, Integer categoryId);
+
+    default List<Event> findPastEvents(Instant now) {
+        return findPastEvents(now, null);
+    }
 }

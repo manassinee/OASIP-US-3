@@ -105,7 +105,12 @@ public class EventService {
 
     public List<EventResponseDTO> getUpcomingAndOngoingEvents(Integer categoryId) {
         Instant now = Instant.now();
-        List<Event> events = repository.findUpcomingAndOngoingEvents(now, categoryId);
+        List<Event> events;
+        if (categoryId != null) {
+            events = repository.findUpcomingAndOngoingEvents(now, categoryId);
+        } else {
+            events = repository.findUpcomingAndOngoingEvents(now);
+        }
         return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
@@ -115,7 +120,12 @@ public class EventService {
 
     public List<EventResponseDTO> getPastEvents(Integer categoryId) {
         Instant now = Instant.now();
-        List<Event> events = repository.findPastEvents(now, categoryId);
+        List<Event> events;
+        if (categoryId != null) {
+            events = repository.findPastEvents(now, categoryId);
+        } else {
+            events = repository.findPastEvents(now);
+        }
         return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
@@ -124,7 +134,12 @@ public class EventService {
     }
 
     public List<EventResponseDTO> getEventsOnDate(Instant startAt, Integer categoryId) {
-        List<Event> events = repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
+        List<Event> events;
+        if (categoryId != null) {
+            events = repository.findByDateRangeOfOneDay(startAt, categoryId);
+        } else {
+            events = repository.findByDateRangeOfOneDay(startAt);
+        }
         return modelMapperUtils.mapList(events, EventResponseDTO.class);
     }
 
