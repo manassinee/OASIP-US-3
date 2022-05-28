@@ -41,16 +41,6 @@ public class EventService {
         return modelMapper.map(event, EventResponseDTO.class);
     }
 
-    public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt, Integer categoryId) {
-        List<Event> events = repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
-        return modelMapperUtils.mapList(events, EventResponseDTO.class);
-    }
-
-    public List<EventResponseDTO> getEventsOnDateStartAt(Instant startAt) {
-        List<Event> events = repository.findByDateRangeOfOneDayStartAt(startAt);
-        return modelMapperUtils.mapList(events, EventResponseDTO.class);
-    }
-
     public EventResponseDTO create(CreateEventRequestDTO newEvent) {
         Event e = new Event();
         EventCategory category = categoryRepository.findById(newEvent.getEventCategoryId())
@@ -131,5 +121,14 @@ public class EventService {
 
     public List<EventResponseDTO> getPastEvents() {
         return getPastEvents(null);
+    }
+
+    public List<EventResponseDTO> getEventsOnDate(Instant startAt, Integer categoryId) {
+        List<Event> events = repository.findByDateRangeOfOneDayStartAtAndCategoryId(startAt, categoryId);
+        return modelMapperUtils.mapList(events, EventResponseDTO.class);
+    }
+
+    public List<EventResponseDTO> getEventsOnDate(Instant startAt) {
+        return getEventsOnDate(startAt, null);
     }
 }

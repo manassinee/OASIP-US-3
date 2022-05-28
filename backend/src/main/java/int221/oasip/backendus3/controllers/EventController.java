@@ -31,9 +31,9 @@ public class EventController {
     ) {
         if ("day".equalsIgnoreCase(type) && startAt != null) {
             if (categoryId != null) {
-                return service.getEventsOnDateStartAt(startAt.toInstant(), categoryId);
+                return service.getEventsOnDate(startAt.toInstant(), categoryId);
             } else {
-                return service.getEventsOnDateStartAt(startAt.toInstant());
+                return service.getEventsOnDate(startAt.toInstant());
             }
         }
 
