@@ -1,6 +1,7 @@
 name: DB CD OMEGALUL
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - "db/**"
