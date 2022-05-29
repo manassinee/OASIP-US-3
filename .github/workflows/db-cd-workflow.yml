@@ -23,8 +23,6 @@ jobs:
         uses: ASzc/change-string-case-action@v1
         with:
           string: ${{ github.repository }}
-      - run: |
-          echo "${{ steps.string.outputs.lowercase }}"
       - name: Build and push
         uses: docker/build-push-action@v3
         with:
