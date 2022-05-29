@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS `oasip`.`event` (
   INDEX `fk_event_eventCategory_idx` (`eventCategoryId` ASC) VISIBLE,
   INDEX `eventStartTime_idx` (`eventStartTime` ASC) VISIBLE,
   INDEX `eventCategoryId_eventStartTime_idx` (`eventCategoryId` ASC, `eventStartTime` ASC) VISIBLE,
+  CHECK (eventDuration BETWEEN 1 AND 480),
   CONSTRAINT `fk_event_eventCategory`
     FOREIGN KEY (`eventCategoryId`)
     REFERENCES `oasip`.`eventCategory` (`eventCategoryId`)
