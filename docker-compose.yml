@@ -25,11 +25,7 @@ services:
       - MYSQL_DATABASE=oasip
 
   frontend:
-    build:
-      context: ./frontend
-      args:
-        - VITE_API_URL=/us3/api
-        - BASE_URL=/us3
+    build: ./frontend
     depends_on:
       - backend
 

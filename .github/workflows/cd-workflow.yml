@@ -84,6 +84,9 @@ jobs:
         with:
           push: true
           context: ./frontend
+          build-args: |
+            VITE_API_URL=/us3/api
+            BASE_URL=/us3
           tags: ghcr.io/${{ steps.string.outputs.lowercase }}/frontend:latest
 
       - name: Reverse proxy image
