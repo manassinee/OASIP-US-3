@@ -33,7 +33,7 @@ services:
     depends_on:
       - backend
 
-  nginx:
+  reverse_proxy:
     build: ./nginx
     ports:
       - "80:80"
