@@ -34,7 +34,7 @@ services:
       - backend
 
   reverse_proxy:
-    build: ./nginx
+    build: ./reverse_proxy
     ports:
       - "80:80"
     depends_on:
