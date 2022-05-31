@@ -7,12 +7,12 @@ on:
         description: Build and push DB image
         type: boolean
         required: false
-      frontend:
-        description: Build and push frontend image
-        type: boolean
-        required: false
       backend:
         description: Build and push backend image
+        type: boolean
+        required: false
+      frontend:
+        description: Build and push frontend image
         type: boolean
         required: false
       reverse_proxy:
@@ -24,12 +24,13 @@ on:
       - main
 
 jobs:
-  changes:
+  docker:
     runs-on: ubuntu-latest
+    name: Build and push Docker images
     steps:
       - uses: actions/checkout@v2
-      - uses: dorny/paths-filter@v2
-        id: changes
+      - id: changes
+        uses: dorny/paths-filter@v2
         with:
           filters: |
             db:
@@ -40,13 +41,6 @@ jobs:
               - 'frontend/**'
             reverse_proxy:
               - 'reverse_proxy/**'
-  docker:
-    needs: changes
-    runs-on: ubuntu-latest
-    name: Build and push Docker images
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
       - name: Login to GitHub Packages
@@ -61,7 +55,7 @@ jobs:
           string: ${{ github.repository }}
 
       - name: DB image
-        if: needs.changes.outputs.db == 'true' || github.event.inputs.db == 'true'
+        if: steps.changes.outputs.db == 'true' || github.event.inputs.db == 'true'
         uses: docker/build-push-action@v3
         with:
           push: true
@@ -69,7 +63,7 @@ jobs:
           tags: ghcr.io/${{ steps.string.outputs.lowercase }}/db:latest
 
       - name: Backend image
-        if: needs.changes.outputs.backend == 'true' || github.event.inputs.backend == 'true'
+        if: steps.changes.outputs.backend == 'true' || github.event.inputs.backend == 'true'
         uses: docker/build-push-action@v3
         with:
           push: true
@@ -79,7 +73,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Frontend image
-        if: needs.changes.outputs.frontend == 'true' || github.event.inputs.frontend == 'true'
+        if: steps.changes.outputs.frontend == 'true' || github.event.inputs.frontend == 'true'
         uses: docker/build-push-action@v3
         with:
           push: true
@@ -90,7 +84,7 @@ jobs:
           tags: ghcr.io/${{ steps.string.outputs.lowercase }}/frontend:latest
 
       - name: Reverse proxy image
-        if: needs.changes.outputs.reverse_proxy == 'true' || github.event.inputs.reverse_proxy == 'true'
+        if: steps.changes.outputs.reverse_proxy == 'true' || github.event.inputs.reverse_proxy == 'true'
         uses: docker/build-push-action@v3
         with:
           push: true
